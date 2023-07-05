@@ -6,6 +6,7 @@ class OutboundConnectorConfig(BaseModel):
     name: str
     type: str
     timeout: Optional[int] = 10
+    output_variable_name: Optional[str]
 
 
 class InboundConnectorConfig(BaseModel):

@@ -5,30 +5,32 @@
 Outbound connectors
 	[x] Base class
 	[x] Connector config
+    [...] Tests
 
 Inbound connectors
 	[x] Base class
 	[x] Connector config
 	[]  Activate inbound connector template
+	[] Tests
 
 Connection configs
 	[x] Config from .env
 	[x] Cloud connection
 	[x] Local insecure connection
-	[]  Local secure connection 
+	[x]  Local secure connection 
+	[] Tests
 
 Template generation
 	[x] Input mapping
 	[x] Output mapping
 	[] Type conersion Camunda <-> Python
-
-Discovery of connectors
-	[] ???
+	[] Tests
 
 Documentation
 	[x] Typehints
 	[x] Dockstrings
 	[] User's guide
+	[] Examples
 
 ## Users guide
 

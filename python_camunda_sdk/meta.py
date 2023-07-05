@@ -9,6 +9,10 @@ class ConnectorMetaclass(ModelMetaclass):
 
     _base_config_cls = None
 
+    @logger.catch(
+        reraise=True,
+        message="Invalid connector definion"
+    )
     def __new__(mcs, cls_name, bases, namespace, **kwargs):
         cls = super().__new__(
             mcs,
@@ -19,12 +23,13 @@ class ConnectorMetaclass(ModelMetaclass):
         )
 
         if bases != (BaseModel,):
-            cls.generate_config()
+            cls._generate_config()
+            cls._check_run_method()
+            cls._extra_pre_init_checks()
 
         return cls
 
-    @logger.catch(reraise=True)
-    def generate_config(cls) -> None:
+    def _generate_config(cls) -> None:
         """Generate config.
 
         Converts ConnectorConfig class inside the connector class into a
@@ -56,3 +61,14 @@ class ConnectorMetaclass(ModelMetaclass):
             data[field_name] = attr
 
         cls._config = cls._base_config_cls(**data)
+
+    def _check_run_method(cls) -> None:
+        run_method = getattr(cls, 'run', None)
+        if run_method is None:
+            raise AttributeError(
+                'Connector must have a run(self, config) method defined.'
+                f' {cls} appers to have no run() method'
+            )
+
+    def _extra_pre_init_checks(cls) -> None:
+        pass

@@ -1,6 +1,7 @@
 import inspect
 
-from typing import Union, Callable, Optional
+from typing import Union, Dict, Optional, get_args
+from collections.abc import Coroutine
 
 from loguru import logger
 
@@ -10,110 +11,70 @@ from pydantic import ValidationError
 from python_camunda_sdk.config import OutboundConnectorConfig
 from python_camunda_sdk.meta import ConnectorMetaclass
 from python_camunda_sdk.types import SimpleTypes
-from python_camunda_sdk import CamundaProperty, Binding, CamundaTemplate
 
 
 class OutboundConnectorMetaclass(ConnectorMetaclass):
     _base_config_cls = OutboundConnectorConfig
 
+    def _extra_pre_init_checks(cls) -> None:
+        cls._check_return_annotation()
+
+    def _check_return_annotation(cls) -> None:
+        signature = inspect.signature(cls.run)
+        return_annotation = signature.return_annotation
+
+        if return_annotation == signature.empty:
+            raise AttributeError(
+                'Connector that return nothing must be annotated with'
+                '-> None.'
+                f' {cls} return nothing.'
+            )
+        if return_annotation in get_args(SimpleTypes):
+            if cls._config.output_variable_name is None:
+                raise AttributeError(
+                    'Connector returning a non-dict value must have'
+                    'output_variable_name set in config.'
+                    f' {cls} returns {return_annotation}'
+                )
+        elif (
+                return_annotation not in (dict, Dict, None.__class__)
+                and not issubclass(return_annotation, BaseModel)
+        ):
+            raise AttributeError(
+                'Return type of a connector run() method must be'
+                ' either a simpel type, dict or a BaseModel.'
+                f' {cls} returns {return_annotation}'
+            )
+        cls._return_type = return_annotation
+
+
 
 class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
     """Outbound connector base class"""
 
-    async def execute(self):
+    @logger.catch(
+        reraise=True,
+        message="Failed to execute connector method"
+    )
+    async def execute(self) -> Optional[Union[BaseModel, SimpleTypes]]:
         """Execute connector `run` method while passing the connector config.
         """
-        return await self.run(self._config)
+        if inspect.iscoroutinefunction(self.run):
+            ret_value = await self.run(self._config)
+        else:
+            ret_value = self.run(self._config)
 
-    async def run(
-        self,
-        config: OutboundConnectorConfig
-    ) -> Optional[Union[BaseModel, SimpleTypes]]:
-        """Virtual method that contains the connector logic.
-
-        Args:
-            config: a config object defined for the connector class.
-
-        Returns:
-            Optional outcome of the connector logic.
-
-        Raises:
-            NotImlementedError: if `run` method is not overridden.
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def generate_template(cls) -> CamundaTemplate:
-        """Generate Camunda template from the connector class definition.
-
-        Converts connector class into a Camunda template mapping class fields
-        into template inputs.
-
-        Example:
-            class MyConnector(OutboundConnector):
-                name: str = Field(description="Name")
-
-                class ConnectorConfig:
-                    name = "MyConnector"
-                    type = "my_connector"
-                    timeout = 1
-
-            Will be converted to a template with input called 'name' and label
-            'Name'. Attributes of the `ConnectorConfig` class will be mapped to
-            the attributes of the template.
-
-        Returns:
-            A camunda template object that can be converted to json for import
-            into Camunda SAAS or desktop modeller.
-        """
-        props = []
-        for field_name, field in cls.__fields__.items():
-            if not field_name.startswith('_'):
-                prop = CamundaProperty(
-                    label=field.field_info.description,
-                    binding=Binding(
-                        type="zeebe:input",
-                        name=field_name
-                    )
-                )
-                props.append(prop)
-
-        signature = inspect.signature(cls.execute)
-
-        return_annotation = signature.return_annotation
-
-        if return_annotation != signature.empty:
-
-            for field_name, field in return_annotation.__fields__.items():
-                if not field_name.startswith('_'):
-                    prop = CamundaProperty(
-                        label=field.field_info.description,
-                        binding=Binding(
-                            type="zeebe:output",
-                            source=f"={field_name}"
-                        )
-                    )
-                    props.append(prop)
-
-        task_type_prop = CamundaProperty(
-            value=cls._type,
-            type="Hidden",
-            binding=Binding(
-                type="zeebe:taskDefinition:type"
+        if not isinstance(ret_value, self._return_type):
+            raise ValueError(
+                'Mismatch between return annotation and returned value in'
+                f' {self.__class__}. Expected {self._return_type}, got'
+                f' {type(ret_value)}'
             )
-        )
 
-        props.append(task_type_prop)
-
-        template = CamundaTemplate(
-            name=cls._name,
-            properties=props
-        )
-
-        return template
+        return ret_value
 
     @classmethod
-    def to_task(cls) -> Callable[..., Union[BaseModel, SimpleTypes]]:
+    def to_task(cls) -> Coroutine[..., Optional[Union[BaseModel, SimpleTypes]]]:
         """Converts connector class into a Python function.
 
         Returns:
@@ -125,8 +86,8 @@ class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
                 connector = cls(**kwargs)
             except ValidationError as e:
                 logger.exception(
-                    'Failed to validate arguments for'
-                    f'{cls._name}'
+                    'Failed to validate arguments for '
+                    f'{cls._config.name}'
                 )
                 raise e
 

@@ -1,9 +1,10 @@
 import os
-import sys
 
-from typing import List, Type
+from typing import List, Type, Literal, Optional
 
-from pydantic import BaseModel, ValidationError
+from grpc import ssl_channel_credentials
+
+from pydantic import BaseModel, Field
 
 import asyncio
 
@@ -11,13 +12,11 @@ from pyzeebe import (
     ZeebeWorker,
     ZeebeClient,
     create_insecure_channel,
-    create_camunda_cloud_channel
-    )
-from pyzeebe import Job
+    create_camunda_cloud_channel,
+    create_secure_channel
+)
 
 from loguru import logger
-
-from dotenv import load_dotenv
 
 from python_camunda_sdk import OutboundConnector, InboundConnector
 
@@ -28,6 +27,60 @@ CAMUNDA_CLUSTER_ID = 'CAMUNDA_CLUSTER_ID'
 ZEBEE_HOSTNAME = 'ZEBEE_HOSTNAME'
 ZEBEE_PORT = 'ZEBEE_PORT'
 
+
+class ConnectionConfig(BaseModel):
+    connection_type: Literal['CAMUNDA_CLOUD', 'INSECURE', 'SECURE'] = Field(
+        env_var="CAMUNDA_CONNECTION_TYPE", export=False
+    )
+
+class CloudConfig(ConnectionConfig):
+    client_id: str = Field(env_var="CAMUNDA_CLIENT_ID")
+    client_secret: str = Field(env_var="CAMUNDA_CLIENT_SECRET")
+    cluster_id: str = Field(env_var="CAMUNDA_CLIENT_SECRET")
+
+class InsecureConfig(ConnectionConfig):
+    hostname: str = Field(env_var="ZEBEE_HOSTNAME")
+    port: str = Field(env_var="ZEBEE_PORT")
+
+class SSLConfig(BaseModel):
+    root_certificates: str = Field(env_var="SSL_ROOT_CA")
+    private_key: str = Field(env_var="SSL_PRIVATE_KEY")
+    certificate_chain: Optional[str] = Field(env_var="SSL_CERTIFICATE_CHAIN")
+
+class SecureConfig(InsecureConfig):
+    ssl_config: SSLConfig
+
+
+def get_env_var(key: str, strict: bool = False) -> str:
+    value = os.environ.get(key, None)
+    if value is None and strict:
+        raise KeyError(f'Could not find environment variable {key}')
+
+    return value
+
+@logger.catch(message="Failed to load config variables", reraise=True)
+def generate_config_from_env()->ConnectionConfig:
+    cls_map = {
+        "SECURE": SecureConfig,
+        "INSECURE": InsecureConfig,
+        "CAMUNDA_CLOUD": CloudConfig
+    }
+
+    connection_type = os.environ.get(CAMUNDA_CONNECTION_TYPE, None)
+    if connection_type is None:
+        raise ValueError('CAMUNDA_CONNECTION_TYPE is not defined')
+    
+    config_cls = cls.cls_map.get(connection_type, None)
+
+    if config_cls is None:
+        raise ValueError(
+            'Unknown CAMUNDA_CONNECTION_TYPE ({connection_type})'
+        )
+
+    data = {}
+    for field_name, field in cls.fields_:
+        breakpoint()
+    return config_cls(data)
 
 class CamundaRuntime:
     """Camunda runtime.
@@ -41,61 +94,87 @@ class CamundaRuntime:
         inbound_connectors: A list of the inbound connector classes.
 
     """
-    @logger.catch(onerror=lambda _: sys.exit(1))
     def __init__(
         self,
+        config: Optional[ConnectionConfig],
         outbound_connectors: List[Type[OutboundConnector]] = [],
         inbound_connectors: List[Type[InboundConnector]] = []
     ):
-        load_dotenv()
 
-        connection_type = os.environ.get(CAMUNDA_CONNECTION_TYPE, None)
-
-        match connection_type:
-            case "CAMUNDA_CLOUD":
-                logger.info('Establising connection to Camunda cloud')
-                channel = create_camunda_cloud_channel(
-                    client_id=os.environ.get(
-                        CAMUNDA_CLIENT_ID,
-                        None
-                    ),
-                    client_secret=os.environ.get(
-                        CAMUNDA_CLIENT_SECRET,
-                        None
-                    ),
-                    cluster_id=os.environ.get(
-                        CAMUNDA_CLUSTER_ID,
-                        None
-                    )
-                )
-            case "INSECURE":
-                logger.info('Establishing an insecure channel to zebee')
-                channel = create_insecure_channel(
-                    hostname=os.environ.get(
-                        ZEBEE_HOSTNAME,
-                        None
-                    ),
-                    port=os.environ.get(
-                        ZEBEE_PORT,
-                        None
-                    )
-                )
-            case None:
-                raise ValueError('CAMUNDA_CONNECTION_TYPE varriable must be set')
-
-            case _:
-                raise ValueError('Unsupported CAMUNDA_CONNECTION_TYPE')
-
-        self._worker = ZeebeWorker(channel)
-
-        self._client = ZeebeClient(channel)
+        if config is None:
+            self._config = generate_config_from_env()
+        else:
+            self._config = config
 
         self._outbound_connectors = outbound_connectors
 
         self._inbound_connectors = {}
 
         for connector_cls in inbound_connectors:
-            self._inbound_connectors[connector_cls._name] = connector_cls
+            self._inbound_connectors[connector_cls._config.name] = connector_cls
+
+    @logger.catch(message="Failed to connect to Zebee", reraise=True)
+    def _connect(self):
+
+        self._worker = ZeebeWorker(channel)
+        self._client = ZeebeClient(channel)
+
+    # @logger.catch(message="Failed to establish connection", reraise=True)
+    # def load_connection_config(self):
+    #     config = generate_config()
+        # connection_type = os.environ.get(CAMUNDA_CONNECTION_TYPE, None)
+
+        # if connection_type == 'CAMUNDA_CLOUD':
+        #     logger.info('Establising connection to Camunda cloud')
+        #     channel = create_camunda_cloud_channel(
+        #         client_id=get_env_var(
+        #             CAMUNDA_CLIENT_ID,
+        #             strict=True
+        #         ),
+        #         client_secret=get_env_var(
+        #             CAMUNDA_CLIENT_SECRET,
+        #             strict=True
+        #         ),
+        #         cluster_id=get_env_var(
+        #             CAMUNDA_CLUSTER_ID,
+        #             strict=True
+        #         )
+        #     )
+        # elif connection_type == 'INSECURE':
+        #     logger.info('Establishing an insecure channel to zeebe')
+        #     channel = create_insecure_channel(
+        #         hostname=get_env_var(
+        #             ZEBEE_HOSTNAME
+        #         ),
+        #         port=get_env_var(
+        #             ZEBEE_PORT
+        #         )
+        #     )
+        # elif connection_type == 'SECURE':
+        #     logger.info('Establishing a secure channel to zeebe')
+        #     channel = create_secure_channel(
+        #         hostname=get_env_var(
+        #             ZEBEE_HOSTNAME
+        #         ),
+        #         port=get_env_var(
+        #             ZEBEE_PORT
+        #         ),
+        #         channel_credentials=ssl_channel_credentials(
+        #             root_certificates=get_env_var(
+        #                 'SSL_ROOT_CA'
+        #             ),
+        #             private_key=get_env_var(
+        #                 'SSL_PRIVATE_KEY'
+        #             ),
+        #             certificate_chain=get_env_var(
+        #                 'SSL_CERTIFICATE_CHAIN'
+        #             )
+        #         )
+        #     )
+        # else:
+        #     raise ValueError('Unsupported CAMUNDA_CONNECTION_TYPE')
+
+        # return channel
 
     @logger.catch(message="Failed to load connector")
     def _load_connector(self, connector_cls: Type[OutboundConnector]) -> None:
@@ -125,19 +204,19 @@ class CamundaRuntime:
             TypeError: If connector returns invalid message type. Only
                 `BaseModel` and `Dict` are allowed.
         """
-        ret = await connector.run()
+        ret = await connector.loop()
 
         if isinstance(ret, BaseModel):
             ret = ret.dict()
         elif not isinstance(ret, dict):
             raise TypeError(
                 f'Inbound connector {connector.__class__.__name__}'
-                f'({connector._name})'
+                f'({connector._config.name})'
                 f' returned an invalid value type ({ret.__class__}).'
                 f'BaseModel or dict were expected.'
             )
         await self._client.publish_message(
-            name=connector._name,
+            name=connector._config.name,
             correlation_key=connector.correlation_key,
             variables=ret
         )
@@ -177,6 +256,8 @@ class CamundaRuntime:
     async def main(self):
         """Main asyncronous method of the runtime.
         """
+        self._connect()
+
         for connector_cls in self._outbound_connectors:
             logger.info(f'Loading {connector_cls._config.name} ({connector_cls._config.type})')
             self._load_connector(connector_cls)

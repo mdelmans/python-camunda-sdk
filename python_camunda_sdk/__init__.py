@@ -5,13 +5,15 @@ from python_camunda_sdk.config import (
 
 from python_camunda_sdk.meta import ConnectorMetaclass
 
+from python_camunda_sdk.outbound import OutboundConnector
+
 from python_camunda_sdk.template import (
     CamundaTemplate,
     Binding,
-    CamundaProperty
+    CamundaProperty,
+    generate_template
 )
 
-from python_camunda_sdk.outbound import OutboundConnector
 from python_camunda_sdk.inbound import InboundConnector
 from python_camunda_sdk.runtime import CamundaRuntime
 
@@ -24,6 +26,7 @@ __all__ = [
     'InboundConnector',
     'CamundaRuntime',
     'CamundaTemplate',
+    'generate_template',
     'Binding',
     'CamundaProperty'
 ]

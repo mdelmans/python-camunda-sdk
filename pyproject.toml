@@ -20,6 +20,9 @@ python-dotenv = "^1.0.0"
 [tool.poetry.scripts]
 generate_template = 'examples:generate_template'
 
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.2.7"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
