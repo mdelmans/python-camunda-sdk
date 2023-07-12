@@ -12,6 +12,7 @@ class Binding(BaseModel):
     type: str
     name: Optional[str]
     source: Optional[str]
+    key: Optional[str]
 
 
 class CamundaProperty(BaseModel):
@@ -19,6 +20,12 @@ class CamundaProperty(BaseModel):
     label: Optional[str]
     type: Optional[str]
     value: Optional[str]
+    group: Optional[str]
+    feel: Optional[str]
+
+class Group(BaseModel):
+    id: Optional[str]
+    label: Optional[str]
 
 
 class CamundaTemplate(BaseModel):
@@ -40,7 +47,7 @@ class CamundaTemplate(BaseModel):
         default=["bpmn:ServiceTask"]
     )
     properties: Optional[List[CamundaProperty]]
-
+    groups: List[Group]
 
 def generate_template(cls: OutboundConnector):
     """Generate Camunda template from the connector class definition.
@@ -76,7 +83,10 @@ def generate_template(cls: OutboundConnector):
                 binding=Binding(
                     type="zeebe:input",
                     name=field_name
-                )
+                ),
+                group='input',
+                feel='optional',
+                type='String'
             )
             props.append(prop)
 
@@ -85,20 +95,29 @@ def generate_template(cls: OutboundConnector):
     return_annotation = signature.return_annotation
 
     if return_annotation != signature.empty:
-
-        for field_name, field in return_annotation.__fields__.items():
-            if not field_name.startswith('_'):
-                prop = CamundaProperty(
-                    label=field.field_info.description,
-                    binding=Binding(
-                        type="zeebe:output",
-                        source=f"={field_name}"
-                    )
-                )
-                props.append(prop)
+        prop = CamundaProperty(
+            label="Result variable",
+            binding=Binding(
+                type="zeebe:taskHeader",
+                key="resultVariable"
+            ),
+            type="String",
+            group="output"
+        )
+        props.append(prop)
+        # for field_name, field in return_annotation.__fields__.items():
+        #     if not field_name.startswith('_'):
+        #         prop = CamundaProperty(
+        #             label=field.field_info.description,
+        #             binding=Binding(
+        #                 type="zeebe:output",
+        #                 source=f"={field_name}"
+        #             )
+        #         )
+        #         props.append(prop)
 
     task_type_prop = CamundaProperty(
-        value=cls._type,
+        value=cls._config.type,
         type="Hidden",
         binding=Binding(
             type="zeebe:taskDefinition:type"
@@ -108,8 +127,18 @@ def generate_template(cls: OutboundConnector):
     props.append(task_type_prop)
 
     template = CamundaTemplate(
-        name=cls._name,
-        properties=props
+        name=cls._config.name,
+        properties=props,
+        groups=[
+            Group(
+                id='input',
+                label='Input'
+            ),
+            Group(
+                id='output',
+                label='Output'
+            )
+        ]
     )
 
     return template

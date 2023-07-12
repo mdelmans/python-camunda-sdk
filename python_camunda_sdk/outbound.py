@@ -8,6 +8,8 @@ from loguru import logger
 from pydantic import BaseModel
 from pydantic import ValidationError
 
+from pyzeebe import Job
+
 from python_camunda_sdk.config import OutboundConnectorConfig
 from python_camunda_sdk.meta import ConnectorMetaclass
 from python_camunda_sdk.types import SimpleTypes
@@ -81,7 +83,7 @@ class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
             A Python function that validates arguments and executes the
             connector logic.
         """
-        async def task(**kwargs) -> Union[BaseModel, SimpleTypes]:
+        async def task(job: Job, **kwargs) -> Union[BaseModel, SimpleTypes]:
             try:
                 connector = cls(**kwargs)
             except ValidationError as e:
@@ -92,8 +94,19 @@ class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
                 raise e
 
             ret = await connector.execute()
+
+            return_value = None
+            
             if isinstance(ret, BaseModel):
-                return ret.dict()
+                return_value = ret.dict()
             else:
-                return ret
+                return_value = ret
+            breakpoint()
+            return_variable_name = job.custom_headers.get(
+                'resultVariable', None
+            )
+
+            if return_variable_name:
+                return {return_variable_name: return_value}
+
         return task
