@@ -1,0 +1,22 @@
+site_name: Python Camunda SDK
+theme:
+  name: "material"
+  features:
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - Python Camunda SDK: index.md
+  - User Guide:
+    - Quick start: quick_start.md

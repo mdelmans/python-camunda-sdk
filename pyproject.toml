@@ -22,6 +22,7 @@ generate_template = 'examples:generate_template'
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.2.7"
+mkdocs-material = "^9.1.18"
 
 [build-system]
 requires = ["poetry-core"]

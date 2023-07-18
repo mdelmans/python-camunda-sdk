@@ -31,22 +31,22 @@ class OutboundConnectorMetaclass(ConnectorMetaclass):
                 '-> None.'
                 f' {cls} return nothing.'
             )
-        if return_annotation in get_args(SimpleTypes):
-            if cls._config.output_variable_name is None:
-                raise AttributeError(
-                    'Connector returning a non-dict value must have'
-                    'output_variable_name set in config.'
-                    f' {cls} returns {return_annotation}'
-                )
-        elif (
-                return_annotation not in (dict, Dict, None.__class__)
-                and not issubclass(return_annotation, BaseModel)
-        ):
-            raise AttributeError(
-                'Return type of a connector run() method must be'
-                ' either a simpel type, dict or a BaseModel.'
-                f' {cls} returns {return_annotation}'
-            )
+        # if return_annotation in get_args(SimpleTypes):
+        #     if cls._config.output_variable_name is None:
+        #         raise AttributeError(
+        #             'Connector returning a non-dict value must have'
+        #             'output_variable_name set in config.'
+        #             f' {cls} returns {return_annotation}'
+        #         )
+        # elif (
+        #         return_annotation not in (dict, Dict, None.__class__)
+        #         and not issubclass(return_annotation, BaseModel)
+        # ):
+        #     raise AttributeError(
+        #         'Return type of a connector run() method must be'
+        #         ' either a simpel type, dict or a BaseModel.'
+        #         f' {cls} returns {return_annotation}'
+        #     )
         cls._return_type = return_annotation
 
 
@@ -95,18 +95,18 @@ class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
 
             ret = await connector.execute()
 
-            return_value = None
-            
-            if isinstance(ret, BaseModel):
-                return_value = ret.dict()
-            else:
-                return_value = ret
-            breakpoint()
             return_variable_name = job.custom_headers.get(
                 'resultVariable', None
             )
 
-            if return_variable_name:
+            if return_variable_name is not None:
+                return_value = None
+                
+                if isinstance(ret, BaseModel):
+                    return_value = ret.dict()
+                else:
+                    return_value = ret
+
                 return {return_variable_name: return_value}
 
         return task

@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Literal
+from typing import Optional
 from pydantic import BaseModel, Field
 
 from loguru import logger
@@ -8,7 +8,6 @@ class OutboundConnectorConfig(BaseModel):
     name: str
     type: str
     timeout: Optional[int] = 10
-    output_variable_name: Optional[str]
 
 
 class InboundConnectorConfig(BaseModel):

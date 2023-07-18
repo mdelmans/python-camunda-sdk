@@ -178,7 +178,7 @@ class CamundaRuntime:
                 task_type='_activate_inbound_connector'
             )(self._activate_inbound_connector)
 
-        logger.info("Staring runtime")
+        logger.info("Starting runtime")
         await self._worker.work()
 
     def start(self):
