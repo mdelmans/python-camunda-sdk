@@ -3,20 +3,31 @@ theme:
   name: "material"
   features:
     - content.code.copy
+    - navigation.tabs
+    - content.code.annotate
 
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      title: On this page
+  - pymdownx.snippets:
+      base_path: "docs/snippets"
+  - tables
+  - pymdownx.superfences
   - pymdownx.inlinehilite
-  - pymdownx.snippets
   - pymdownx.superfences
   - admonition
   - pymdownx.details
   - pymdownx.superfences
 
 nav:
-  - Python Camunda SDK: index.md
-  - User Guide:
-    - Quick start: quick_start.md
+  - index.md
+  - Quick start:
+    - quick_start/outbound_connectors.md
+    - quick_start/generate_template.md
+    - quick_start/setup_runtime.md

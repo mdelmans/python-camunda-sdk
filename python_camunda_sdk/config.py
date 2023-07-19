@@ -19,10 +19,9 @@ class ConnectionConfig(BaseModel):
     pass
 
 class CloudConfig(ConnectionConfig):
-    _connection_type: str = "CAMUNDA_CLOUD"
     client_id: str = Field(env_var='CAMUNDA_CLIENT_ID')
     client_secret: str = Field(env_var='CAMUNDA_CLIENT_SECRET')
-    cluster_id: str = Field(env_var='CAMUNDA_CLIENT_SECRET')
+    cluster_id: str = Field(env_var='CAMUNDA_CLUSTER_ID')
 
 class InsecureConfig(ConnectionConfig):
     hostname: str = Field(env_var='ZEBEE_HOSTNAME')
