@@ -3,7 +3,7 @@
 Outbound connectors are defined as classes derived from `OutboundConnector`. Bellow is a code of a simple connector that logs messages to console and returns a `StatusModel` object.
 
 !!! tip
-    Connectors doesn't have to return a `BaseModel`, `dict` or simple types like `str`, `int` or `float`. 
+    Connectors don't have to return a `BaseModel`. `dict` or simple types like `str`, `int` or `float` work as well.
 
 ``` py linenums="1" title="log.py"
 --8<-- "log.py"

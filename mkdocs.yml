@@ -5,6 +5,7 @@ theme:
     - content.code.copy
     - navigation.tabs
     - content.code.annotate
+    - navigation.footer
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -24,6 +25,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - attr_list
+  - md_in_html
 
 nav:
   - index.md
@@ -31,3 +34,5 @@ nav:
     - quick_start/outbound_connectors.md
     - quick_start/generate_template.md
     - quick_start/setup_runtime.md
+    - quick_start/using_templates.md
+    - quick_start/inbound_connectors.md

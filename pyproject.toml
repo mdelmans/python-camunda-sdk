@@ -5,7 +5,8 @@ description = ""
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
 readme = "README.md"
 packages = [
-	{include = "python_camunda_sdk"}
+	{include = "python_camunda_sdk"},
+	{include = "examples"}
 ]
 
 [tool.poetry.dependencies]

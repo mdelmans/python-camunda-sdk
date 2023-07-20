@@ -112,7 +112,7 @@ class CamundaRuntime:
             TypeError: If connector returns invalid message type. Only
                 `BaseModel` and `Dict` are allowed.
         """
-        ret = await connector.loop()
+        ret = await connector.run(connector._config)
 
         if isinstance(ret, BaseModel):
             ret = ret.dict()

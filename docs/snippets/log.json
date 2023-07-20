@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema@0.9.0/resources/schema.json",
+  "name": "LogConnector",
+  "id": "1d696704-d29c-4a80-94f1-89b8fd3735b7",
+  "appliesTo": [
+    "bpmn:ServiceTask"
+  ],
+  "properties": [
+    {
+      "binding": {
+        "type": "zeebe:input",
+        "name": "message"
+      },
+      "label": "Message to log",
+      "type": "String",
+      "group": "input",
+      "feel": "optional"
+    },
+    {
+      "binding": {
+        "type": "zeebe:taskHeader",
+        "key": "resultVariable"
+      },
+      "label": "Result variable",
+      "type": "String",
+      "group": "output"
+    },
+    {
+      "binding": {
+        "type": "zeebe:taskDefinition:type"
+      },
+      "type": "Hidden",
+      "value": "log"
+    }
+  ],
+  "groups": [
+    {
+      "id": "input",
+      "label": "Input"
+    },
+    {
+      "id": "output",
+      "label": "Output"
+    }
+  ]
+}
