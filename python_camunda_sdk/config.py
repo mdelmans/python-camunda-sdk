@@ -4,14 +4,15 @@ from pydantic import BaseModel, Field
 
 from loguru import logger
 
-class OutboundConnectorConfig(BaseModel):
+class ConnectorConfig(BaseModel):
     name: str
     type: str
     timeout: Optional[int] = 10
 
+class OutboundConnectorConfig(ConnectorConfig):
+    pass
 
-class InboundConnectorConfig(BaseModel):
-    name: str
+class InboundConnectorConfig(ConnectorConfig):
     cycle_duration: Optional[int] = 1
 
 

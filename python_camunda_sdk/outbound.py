@@ -1,6 +1,6 @@
 import inspect
 
-from typing import Union, Dict, Optional, get_args
+from typing import Union, Optional
 from collections.abc import Coroutine
 
 from loguru import logger
@@ -8,7 +8,7 @@ from loguru import logger
 from pydantic import BaseModel
 from pydantic import ValidationError
 
-from pyzeebe import Job
+from pyzeebe import Job, ZeebeClient
 
 from python_camunda_sdk.config import OutboundConnectorConfig
 from python_camunda_sdk.meta import ConnectorMetaclass
@@ -76,7 +76,10 @@ class OutboundConnector(BaseModel, metaclass=OutboundConnectorMetaclass):
         return ret_value
 
     @classmethod
-    def to_task(cls) -> Coroutine[..., Optional[Union[BaseModel, SimpleTypes]]]:
+    def to_task(
+        cls,
+        client: ZeebeClient
+    ) -> Coroutine[..., Optional[Union[BaseModel, SimpleTypes]]]:
         """Converts connector class into a Python function.
 
         Returns:

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import inspect
 
@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-from python_camunda_sdk.outbound import OutboundConnector
+from python_camunda_sdk import OutboundConnector, InboundConnector
 
 class Binding(BaseModel):
     type: str
@@ -49,6 +49,71 @@ class CamundaTemplate(BaseModel):
     properties: Optional[List[CamundaProperty]]
     groups: List[Group]
 
+
+def generate_input_props(
+    cls: Union[OutboundConnector, InboundConnector]
+) -> List[CamundaProperty]:
+    props = []
+    for field_name, field in cls.__fields__.items():
+        if not field_name.startswith('_'):
+            prop = CamundaProperty(
+                label=field.field_info.description,
+                binding=Binding(
+                    type="zeebe:input",
+                    name=field_name
+                ),
+                group='input',
+                feel='optional',
+                type='String'
+            )
+            props.append(prop)
+
+    return props
+
+def generate_inbound_config_props(cls: InboundConnector):
+    correlation_key_prop = CamundaProperty(
+        label="Correlation key",
+        binding=Binding(
+            type="zeebe:input",
+            name="correlation_key"
+        ),
+        group='config',
+        feel='optional',
+        type='String'
+    )
+
+    message_name_prop = CamundaProperty(
+        label="Message name",
+        binding=Binding(
+            type="zeebe:input",
+            name="message_name"
+        ),
+        group='config',
+        feel='optional',
+        type='String'
+    )
+
+    return [correlation_key_prop, message_name_prop]
+
+def generate_output_prop(
+    cls: Union[OutboundConnector, InboundConnector]
+) -> Optional[CamundaProperty]:
+    signature = inspect.signature(cls.run)
+
+    return_annotation = signature.return_annotation
+
+    if return_annotation != signature.empty:
+        prop = CamundaProperty(
+            label="Result variable",
+            binding=Binding(
+                type="zeebe:taskHeader",
+                key="resultVariable"
+            ),
+            type="String",
+            group="output"
+        )
+        return prop
+
 def generate_template(cls: OutboundConnector):
     """Generate Camunda template from the connector class definition.
 
@@ -75,20 +140,7 @@ def generate_template(cls: OutboundConnector):
         A camunda template object that can be converted to json for import
         into Camunda SAAS or desktop modeller.
     """
-    props = []
-    for field_name, field in cls.__fields__.items():
-        if not field_name.startswith('_'):
-            prop = CamundaProperty(
-                label=field.field_info.description,
-                binding=Binding(
-                    type="zeebe:input",
-                    name=field_name
-                ),
-                group='input',
-                feel='optional',
-                type='String'
-            )
-            props.append(prop)
+    props = generate_input_props(cls)
 
     signature = inspect.signature(cls.run)
 
@@ -105,16 +157,6 @@ def generate_template(cls: OutboundConnector):
             group="output"
         )
         props.append(prop)
-        # for field_name, field in return_annotation.__fields__.items():
-        #     if not field_name.startswith('_'):
-        #         prop = CamundaProperty(
-        #             label=field.field_info.description,
-        #             binding=Binding(
-        #                 type="zeebe:output",
-        #                 source=f"={field_name}"
-        #             )
-        #         )
-        #         props.append(prop)
 
     task_type_prop = CamundaProperty(
         value=cls._config.type,
@@ -126,19 +168,32 @@ def generate_template(cls: OutboundConnector):
 
     props.append(task_type_prop)
 
+    groups=[
+        Group(
+            id='input',
+            label='Input'
+        ),
+        Group(
+            id='output',
+            label='Output'
+        )
+    ]
+
+    if issubclass(cls, InboundConnector):
+        props.extend(
+            generate_inbound_config_props(cls)
+        )
+        groups.append(
+            Group(
+                id='config',
+                label='Configuration'
+            )
+        )
+
     template = CamundaTemplate(
         name=cls._config.name,
         properties=props,
-        groups=[
-            Group(
-                id='input',
-                label='Input'
-            ),
-            Group(
-                id='output',
-                label='Output'
-            )
-        ]
+        groups=groups
     )
 
     return template

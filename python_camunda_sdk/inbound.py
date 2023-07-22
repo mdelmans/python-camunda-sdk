@@ -1,32 +1,22 @@
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, Coroutine
 import asyncio
 
-from pydantic import BaseModel
+from loguru import logger
+
+from pyzeebe import Job, ZeebeClient
+
+from pydantic import BaseModel, ValidationError
 
 from python_camunda_sdk.meta import ConnectorMetaclass
 from python_camunda_sdk.config import InboundConnectorConfig
+from python_camunda_sdk.types import SimpleTypes
 
 class InboundConnectorMetaclass(ConnectorMetaclass):
     _base_config_cls = InboundConnectorConfig
 
 class InboundConnector(BaseModel, metaclass=InboundConnectorMetaclass):
     """Inbound connector base class.
-
-    Attrs:
-        correlation_key: Correlation key for the receive message event.
     """
-    correlation_key: str
-
-    # async def run(self) -> Optional[Union[BaseModel, Dict]]:
-    #     """Virtual method for catching external event.
-
-    #     Returns:
-    #         None: if event has not been received in the current loop.
-    #         Union[BaseModel, Dict]: if event has been received.
-    #             The return value contains variables that will be passed
-    #             to the process instance.
-    #     """
-    #     raise NotImplementedError
 
     async def loop(self) -> Union[BaseModel, Dict]:
         """Starts inbound connector loop.
@@ -39,7 +29,63 @@ class InboundConnector(BaseModel, metaclass=InboundConnectorMetaclass):
         """
         ret = None
         while ret is None:
-            ret = await self.run()
+            ret = await self.run(config=self._config)
             if ret is None:
                 await asyncio.sleep(self._config.cycle_duration)
         return ret
+
+    async def execute(self,
+        job: Job,
+        client: ZeebeClient,
+        correlation_key: str,
+        message_name: str
+    ):
+        ret = await self.loop()
+        if isinstance(ret, BaseModel):
+            ret = ret.dict()
+        elif not isinstance(ret, dict):
+            raise TypeError(
+                f'Inbound connector {self.__class__.__name__}'
+                f'({self._config.name})'
+                f' returned an invalid value type ({ret.__class__}).'
+                f'BaseModel or dict were expected.'
+            )
+        await client.publish_message(
+            name=message_name,
+            correlation_key=correlation_key,
+            variables=ret
+        )
+
+    @classmethod
+    def to_task(
+        cls,
+        client: ZeebeClient):
+        async def task(
+            job: Job,
+            correlation_key: str,
+            message_name: str,
+            **kwargs
+        ) -> Union[BaseModel, SimpleTypes]:
+            try:
+                connector = cls(
+                    correlation_key=correlation_key,
+                    **kwargs
+                )
+            except ValidationError as e:
+                logger.exception(
+                    'Failed to validate arguments for '
+                    f'{cls._config.name}'
+                )
+                raise e
+
+            loop = asyncio.get_event_loop()
+            loop.create_task(
+                connector.execute(
+                    job=job,
+                    client=client,
+                    correlation_key=correlation_key,
+                    message_name=message_name
+                )
+            )
+
+        return task
