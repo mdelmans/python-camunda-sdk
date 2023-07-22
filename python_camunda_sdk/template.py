@@ -57,7 +57,7 @@ def generate_input_props(
     for field_name, field in cls.__fields__.items():
         if not field_name.startswith('_'):
             prop = CamundaProperty(
-                label=field.field_info.description,
+                label=field.field_info.description or field_name,
                 binding=Binding(
                     type="zeebe:input",
                     name=field_name

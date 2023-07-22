@@ -43,17 +43,26 @@ class InboundConnector(BaseModel, metaclass=InboundConnectorMetaclass):
         ret = await self.loop()
         if isinstance(ret, BaseModel):
             ret = ret.dict()
-        elif not isinstance(ret, dict):
-            raise TypeError(
-                f'Inbound connector {self.__class__.__name__}'
-                f'({self._config.name})'
-                f' returned an invalid value type ({ret.__class__}).'
-                f'BaseModel or dict were expected.'
-            )
+
+        return_variable_name = job.custom_headers.get(
+            'resultVariable', None
+        )
+        variables = {}
+
+        if return_variable_name is not None:
+            return_value = None
+            
+            if isinstance(ret, BaseModel):
+                return_value = ret.dict()
+            else:
+                return_value = ret
+
+            variables = {return_variable_name: return_value}
+
         await client.publish_message(
             name=message_name,
             correlation_key=correlation_key,
-            variables=ret
+            variables=variables
         )
 
     @classmethod
