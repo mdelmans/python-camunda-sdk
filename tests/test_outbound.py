@@ -8,7 +8,8 @@ from util import (
     true_body,
     none_body,
     dict_body,
-    async_test
+    async_test,
+    DummyJob
 )
 
 class DummyModel(BaseModel):
@@ -30,7 +31,6 @@ class TestOutbound(TestCase):
                 name = "dummy"
                 type = "dummy"
                 timeout = 10
-                output_variable_name = "output"
 
         return DummyOutboundConnector
 
@@ -66,12 +66,15 @@ class TestOutbound(TestCase):
                 name = "dummy"
                 type = "dummy"
                 timeout = 10
-                output_variable_name = "output"
 
         connector = DummyOutboundConnector()
-
-        ret = await connector.execute()
-        self.assertTrue(ret)
+        
+        job = DummyJob(result_variable='ret')
+        ret = await connector.execute(job=job)
+        
+        self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertTrue(ret['ret'])
 
     @async_test
     async def test_sync_run(self):
@@ -79,8 +82,12 @@ class TestOutbound(TestCase):
 
         connector = cls()
 
-        ret = await connector.execute()
-        self.assertTrue(ret)
+        job = DummyJob(result_variable='ret')
+        ret = await connector.execute(job=job)
+        
+        self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertTrue(ret['ret'])
 
     @async_test
     async def test_return_none(self):
@@ -90,9 +97,12 @@ class TestOutbound(TestCase):
 
         self.assertIsNotNone(connector)
 
-        ret = await connector.execute()
-
-        self.assertIsNone(ret)
+        job = DummyJob(result_variable='ret')
+        ret = await connector.execute(job=job)
+        
+        self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertIsNone(ret['ret'])
 
     @async_test
     async def test_return_dict(self):
@@ -102,9 +112,12 @@ class TestOutbound(TestCase):
 
         self.assertIsNotNone(connector)
 
-        ret = await connector.execute()
-
+        job = DummyJob(result_variable='ret')
+        ret = await connector.execute(job=job)
+        
         self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertIsInstance(ret['ret'], dict)
 
     @async_test
     async def test_return_model(self):
@@ -114,9 +127,12 @@ class TestOutbound(TestCase):
 
         self.assertIsNotNone(connector)
 
-        ret = await connector.execute()
-
-        self.assertIsInstance(ret, DummyModel)
+        job = DummyJob(result_variable='ret')
+        ret = await connector.execute(job=job)
+        
+        self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertIsInstance(ret['ret'], dict)
 
     @async_test
     async def test_return_wrong_type(self):
@@ -126,7 +142,8 @@ class TestOutbound(TestCase):
 
         self.assertIsNotNone(connector)
         with self.assertRaises(ValueError):
-            await connector.execute()
+            job = DummyJob(result_variable='ret')
+            ret = await connector.execute(job=job)
 
     def test_no_run_method(self):
         with self.assertRaises(AttributeError):
@@ -135,24 +152,11 @@ class TestOutbound(TestCase):
                     name = "dummy"
                     type = "dummy"
                     timeout = 10
-                    output_variable_name = "output"
 
     def test_no_return_annotation(self):
         with self.assertRaises(AttributeError):
             class DummyOutboundConnector(OutboundConnector):
                 def run(self, config):
-                    return True
-
-                class ConnectorConfig:
-                    name = "dummy"
-                    type = "dummy"
-                    timeout = 10
-                    output_variable_name = "output"
-
-    def test_no_output_variable_name(self):
-        with self.assertRaises(AttributeError):
-            class DummyOutboundConnector(OutboundConnector):
-                def run(self, config) -> bool:
                     return True
 
                 class ConnectorConfig:
@@ -178,11 +182,15 @@ class TestOutbound(TestCase):
     async def test_to_task_conversion(self):
         cls = self.generate_outbound_connector(true_body, bool)
 
-        task = cls.to_task()
+        job = DummyJob(result_variable='ret')
 
-        ret = await task()
+        task = cls.to_task(client=None)
 
-        self.assertTrue(ret)
+        ret = await task(job=job)
+
+        self.assertIsInstance(ret, dict)
+        self.assertIn('ret', ret)
+        self.assertTrue(ret['ret'])
 
     @async_test
     async def test_task_validation_failure(self):
@@ -196,30 +204,8 @@ class TestOutbound(TestCase):
                 name = "dummy"
                 type = "dummy"
                 timeout = 10
-                output_variable_name = "output"
 
-        task = DummyOutboundConnector.to_task()
+        task = DummyOutboundConnector.to_task(client=None)
+        job = DummyJob(result_variable='ret')
         with self.assertRaises(ValidationError):
-            await task(input_field='foo')
-
-    @async_test
-    async def test_task_model_conversion(self):
-        class DummyOutboundConnector(OutboundConnector):
-            input_field: int
-
-            def run(self, config) -> DummyModel:
-                return DummyModel(foo=self.input_field + 1)
-
-            class ConnectorConfig:
-                name = "dummy"
-                type = "dummy"
-                timeout = 10
-                output_variable_name = "output"
-
-        task = DummyOutboundConnector.to_task()
-
-        ret = await task(input_field=1)
-
-        self.assertIsInstance(ret, dict)
-        self.assertIn('foo', ret)
-        self.assertEquals(ret['foo'], 2)
+            await task(job=job, input_field='foo')

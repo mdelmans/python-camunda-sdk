@@ -6,6 +6,7 @@ theme:
     - navigation.tabs
     - content.code.annotate
     - navigation.footer
+    - navigation.indexes
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -31,8 +32,12 @@ markdown_extensions:
 nav:
   - index.md
   - Quick start:
-    - quick_start/outbound_connectors.md
-    - quick_start/generate_template.md
+    - quick_start/index.md
+    - Outbound connectors:
+      - quick_start/outbound_connectors.md
+      - quick_start/generate_outbound_template.md
     - quick_start/setup_runtime.md
     - quick_start/using_templates.md
-    - quick_start/inbound_connectors.md
+    - Inbound connectors:
+      - quick_start/inbound_connectors.md
+      - quick_start/generate_inbound_template.md

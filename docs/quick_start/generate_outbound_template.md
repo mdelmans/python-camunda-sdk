@@ -1,4 +1,4 @@
-# Generate template
+# Generate outbound template
 
 You can generate templates for use in Camunda SaaS or Camunda Modeler from you outbound connectors.
 
@@ -34,16 +34,22 @@ Generated template for example.LogConnector
 * `message` field of the `LogConnector` was converted into a `zeebe:input` property.
 * A `zeebe:taskHeader` with key 'resultVariable' was added to allow users define the name of the variable where the output of the `LogConnector.run` method will be stored.
 
-
 === "Template rendering"
 
 	![Image title](/img/template.png){ align=left, width="300" }
 
 === "Template json"
 
-	``` json
+	``` json linenums="1" title="example/log.json"
 	--8<-- "log.json"
 	```
+
+=== "LogConnector"
+
+	```py linenums="1" title="example/log.py"
+	--8<-- "log.py"
+	```
+
 
 ## Importing template to Camunda SaaS
 

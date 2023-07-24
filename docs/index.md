@@ -6,7 +6,7 @@
 
 It simplifies definitions of outbound and inbound connectors and utilises [pydantic](https://pydantic.dev/) for data validation.
 
-See [Quick start](/quick_start) to get started and [API](api.md) for usage.
+[Get started](quick_start){ .md-button }
 
 ## Dependencies
 

@@ -13,8 +13,7 @@ class OutboundConnectorConfig(ConnectorConfig):
     pass
 
 class InboundConnectorConfig(ConnectorConfig):
-    cycle_duration: Optional[int] = 1
-
+    pass 
 
 class ConnectionConfig(BaseModel):
     pass

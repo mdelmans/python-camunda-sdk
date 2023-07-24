@@ -5,7 +5,7 @@ Outbound connectors are defined as classes derived from `OutboundConnector`. Bel
 !!! tip
     Connectors don't have to return a `BaseModel`. `dict` or simple types like `str`, `int` or `float` work as well.
 
-``` py linenums="1" title="log.py"
+``` py linenums="1" title="example/log.py"
 --8<-- "log.py"
 ```
 

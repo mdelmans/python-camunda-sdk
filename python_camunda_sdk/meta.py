@@ -1,19 +1,33 @@
+from typing import Optional, Union, get_args
+from types import NoneType
+
+import inspect
+
 from loguru import logger
 
 from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
 
+from pyzeebe import Job
+
+from python_camunda_sdk.types import SimpleTypes
+from python_camunda_sdk.config import ConnectorConfig
 
 class ConnectorMetaclass(ModelMetaclass):
     """Base class for connector metaclass"""
-
-    _base_config_cls = None
 
     @logger.catch(
         reraise=True,
         message="Invalid connector definion"
     )
-    def __new__(mcs, cls_name, bases, namespace, **kwargs):
+    def __new__(
+        mcs,
+        cls_name,
+        bases,
+        namespace,
+        base_config_cls  = ConnectorConfig,
+        **kwargs
+    ):
         cls = super().__new__(
             mcs,
             cls_name,
@@ -21,10 +35,13 @@ class ConnectorMetaclass(ModelMetaclass):
             namespace,
             **kwargs
         )
-
-        if bases != (BaseModel,):
+        
+        cls._base_config_cls = base_config_cls
+        print(cls_name, bases)
+        if bases != (BaseModel,) and bases != (Connector,):
             cls._generate_config()
             cls._check_run_method()
+            cls._check_return_annotation()
             cls._extra_pre_init_checks()
 
         return cls
@@ -70,5 +87,64 @@ class ConnectorMetaclass(ModelMetaclass):
                 f' {cls} appers to have no run() method'
             )
 
+    def _check_return_annotation(cls) -> None:
+        signature = inspect.signature(cls.run)
+        return_annotation = signature.return_annotation
+
+        if return_annotation == signature.empty:
+            raise AttributeError(
+                'Connector that return nothing must be annotated with'
+                '-> None.'
+                f' {cls} return nothing.'
+            )
+
+        if (
+            return_annotation != NoneType
+            and not issubclass(return_annotation, BaseModel)
+            and return_annotation not in get_args(SimpleTypes)
+        ):
+            raise AttributeError(
+                f'Connector returns invalid type ({return_annotation})'
+            )
+        cls._return_type = return_annotation
+
     def _extra_pre_init_checks(cls) -> None:
         pass
+
+class Connector(BaseModel, metaclass=ConnectorMetaclass):
+    @logger.catch(
+        reraise=True,
+        message="Failed to execute connector method"
+    )
+    async def execute(self, job: Job) -> Optional[Union[BaseModel, SimpleTypes]]:
+        """Execute connector `run` method while passing the connector config.
+
+        Raises:
+            ValueError: If type of the returned value does not match the
+            typehint.
+        """
+        if inspect.iscoroutinefunction(self.run):
+            ret_value = await self.run(self._config)
+        else:
+            ret_value = self.run(self._config)
+
+        if not isinstance(ret_value, self._return_type):
+            raise ValueError(
+                'Mismatch between return annotation and returned value in'
+                f' {self.__class__}. Expected {self._return_type}, got'
+                f' {type(ret_value)}'
+            )
+
+        return_variable_name = job.custom_headers.get(
+                'resultVariable', None
+            )
+
+        if return_variable_name is not None:
+            return_value = None
+            
+            if isinstance(ret_value, BaseModel):
+                return_value = ret_value.dict()
+            else:
+                return_value = ret_value
+
+            return {return_variable_name: return_value}

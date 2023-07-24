@@ -7,32 +7,13 @@ from pyzeebe import Job, ZeebeClient
 
 from pydantic import BaseModel, ValidationError
 
-from python_camunda_sdk.meta import ConnectorMetaclass
+from python_camunda_sdk.meta import ConnectorMetaclass, Connector
 from python_camunda_sdk.config import InboundConnectorConfig
 from python_camunda_sdk.types import SimpleTypes
 
-class InboundConnectorMetaclass(ConnectorMetaclass):
-    _base_config_cls = InboundConnectorConfig
-
-class InboundConnector(BaseModel, metaclass=InboundConnectorMetaclass):
+class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
     """Inbound connector base class.
     """
-
-    async def loop(self) -> Union[BaseModel, Dict]:
-        """Starts inbound connector loop.
-
-        Repeats the `loop` method until a non-None value is returned
-            with a period defined in a config (cycle).
-
-        Returns:
-            Content of the inbound message.
-        """
-        ret = None
-        while ret is None:
-            ret = await self.run(config=self._config)
-            if ret is None:
-                await asyncio.sleep(self._config.cycle_duration)
-        return ret
 
     async def execute(self,
         job: Job,
@@ -40,25 +21,7 @@ class InboundConnector(BaseModel, metaclass=InboundConnectorMetaclass):
         correlation_key: str,
         message_name: str
     ):
-        ret = await self.loop()
-        if isinstance(ret, BaseModel):
-            ret = ret.dict()
-
-        return_variable_name = job.custom_headers.get(
-            'resultVariable', None
-        )
-        variables = {}
-
-        if return_variable_name is not None:
-            return_value = None
-            
-            if isinstance(ret, BaseModel):
-                return_value = ret.dict()
-            else:
-                return_value = ret
-
-            variables = {return_variable_name: return_value}
-
+        variables = await super().execute(job=job)
         await client.publish_message(
             name=message_name,
             correlation_key=correlation_key,

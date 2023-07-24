@@ -8,7 +8,7 @@ from python_camunda_sdk.config import (
     generate_config_from_env
 )
 
-from python_camunda_sdk.meta import ConnectorMetaclass
+from python_camunda_sdk.meta import ConnectorMetaclass, Connector
 
 from python_camunda_sdk.outbound import OutboundConnector
 from python_camunda_sdk.inbound import InboundConnector
