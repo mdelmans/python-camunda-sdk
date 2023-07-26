@@ -1,12 +1,11 @@
 [tool.poetry]
 name = "python-camunda-sdk"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
 readme = "README.md"
 packages = [
-	{include = "python_camunda_sdk"},
-	{include = "examples"}
+	{include = "python_camunda_sdk"}
 ]
 
 [tool.poetry.dependencies]
@@ -15,7 +14,6 @@ pyzeebe = "^3.0.4"
 pydantic = "^1.10.7"
 loguru = "^0.7.0"
 click = "^8.1.3"
-python-dotenv = "^1.0.0"
 
 [tool.poetry.scripts]
 generate_template = 'python_camunda_sdk.generate_template:generate_template'

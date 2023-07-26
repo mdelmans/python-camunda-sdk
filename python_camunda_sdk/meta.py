@@ -37,7 +37,7 @@ class ConnectorMetaclass(ModelMetaclass):
         )
         
         cls._base_config_cls = base_config_cls
-        print(cls_name, bases)
+
         if bases != (BaseModel,) and bases != (Connector,):
             cls._generate_config()
             cls._check_run_method()
