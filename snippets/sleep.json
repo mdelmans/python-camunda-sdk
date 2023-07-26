@@ -1,0 +1,70 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema@0.9.0/resources/schema.json",
+  "name": "Sleep",
+  "id": "a631e9a0-939e-4d73-b78c-34939e44eab0",
+  "appliesTo": [
+    "bpmn:ServiceTask"
+  ],
+  "properties": [
+    {
+      "binding": {
+        "type": "zeebe:input",
+        "name": "duration"
+      },
+      "label": "Duration of sleep in seconds",
+      "type": "String",
+      "group": "input",
+      "feel": "optional"
+    },
+    {
+      "binding": {
+        "type": "zeebe:taskHeader",
+        "key": "resultVariable"
+      },
+      "label": "Result variable",
+      "type": "String",
+      "group": "output"
+    },
+    {
+      "binding": {
+        "type": "zeebe:taskDefinition:type"
+      },
+      "type": "Hidden",
+      "value": "sleep"
+    },
+    {
+      "binding": {
+        "type": "zeebe:input",
+        "name": "correlation_key"
+      },
+      "label": "Correlation key",
+      "type": "String",
+      "group": "config",
+      "feel": "optional"
+    },
+    {
+      "binding": {
+        "type": "zeebe:input",
+        "name": "message_name"
+      },
+      "label": "Message name",
+      "type": "String",
+      "group": "config",
+      "feel": "optional"
+    }
+  ],
+  "groups": [
+    {
+      "id": "input",
+      "label": "Input"
+    },
+    {
+      "id": "output",
+      "label": "Output"
+    },
+    {
+      "id": "config",
+      "label": "Configuration"
+    }
+  ]
+}
