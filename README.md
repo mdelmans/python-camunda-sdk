@@ -1,5 +1,6 @@
 [![Docs Badge](https://img.shields.io/badge/documentation-blue)](https://mdelmans.github.io/python-camunda-sdk/)
 
+<img src="https://github.com/mdelmans/python-camunda-sdk/blob/master/docs/img/pycam.svg" width="100"/>
 
 # Python Camunda SDK
 
