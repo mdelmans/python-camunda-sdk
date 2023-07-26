@@ -1,8 +1,12 @@
 site_name: Python Camunda SDK
+repo_url: https://github.com/mdelmans/python-camunda-sdk
+repo_name: mdelmans/python-camunda-sdk
 theme:
   name: "material"
   logo: img/pycam.svg
   favicon: img/pycam.svg
+  icon:
+    repo: fontawesome/brands/github-alt
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: pycam
