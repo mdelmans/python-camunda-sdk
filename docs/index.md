@@ -1,6 +1,5 @@
-# Welcome
-
-## About
+ ![Pycam logo](img/pycam.svg){ width="100" }
+# About
 
 **Python Camunda SDK** is an implementation of Camunda SDK in Python built on top of the [pyzeebe](https://github.com/camunda-community-hub/pyzeebe).
 

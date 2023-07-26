@@ -1,6 +1,19 @@
 site_name: Python Camunda SDK
 theme:
   name: "material"
+  logo: img/pycam.svg
+  favicon: img/pycam.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: pycam
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - content.code.copy
     - navigation.tabs
@@ -29,8 +42,11 @@ markdown_extensions:
   - attr_list
   - md_in_html
 
+extra_css:
+  - stylesheets/extra.css
+
 nav:
-  - index.md
+  - About: index.md
   - Quick start:
     - quick_start/index.md
     - Outbound connectors:
