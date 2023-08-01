@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-from python_camunda_sdk import OutboundConnector, InboundConnector
+from python_camunda_sdk import Connector, InboundConnector
 
 class Binding(BaseModel):
     type: str
@@ -51,7 +51,7 @@ class CamundaTemplate(BaseModel):
 
 
 def generate_input_props(
-    cls: Union[OutboundConnector, InboundConnector]
+    cls: Connector
 ) -> List[CamundaProperty]:
     props = []
     for field_name, field in cls.__fields__.items():
@@ -96,7 +96,7 @@ def generate_inbound_config_props(cls: InboundConnector):
     return [correlation_key_prop, message_name_prop]
 
 def generate_output_prop(
-    cls: Union[OutboundConnector, InboundConnector]
+    cls: Connector
 ) -> Optional[CamundaProperty]:
     signature = inspect.signature(cls.run)
 
@@ -114,7 +114,7 @@ def generate_output_prop(
         )
         return prop
 
-def generate_template(cls: OutboundConnector):
+def generate_template(cls: Connector):
     """Generate Camunda template from the connector class definition.
 
     Converts connector class into a Camunda template mapping class fields

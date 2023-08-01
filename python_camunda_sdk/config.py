@@ -5,6 +5,17 @@ from pydantic import BaseModel, Field
 from loguru import logger
 
 class ConnectorConfig(BaseModel):
+    """Base configuration class for connectors.
+    
+    !!! warning
+        Should not be used dirrectly. For reference only.
+
+    Attributes:
+        name: Name of the connector.
+        type: Type of the connector. This will correspond to the type of
+            the service task that will be calling the connector.
+        timeout: Timeout for the connector.
+    """
     name: str
     type: str
     timeout: Optional[int] = 10

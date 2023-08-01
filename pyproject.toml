@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "python-camunda-sdk"
 version = "0.2.0"
-description = ""
+description = "Python Camunda SKD"
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
 readme = "README.md"
 packages = [
@@ -21,6 +21,7 @@ generate_template = 'python_camunda_sdk.generate_template:generate_template'
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.2.7"
 mkdocs-material = "^9.1.18"
+mkdocstrings-python = "^1.2.1"
 
 [build-system]
 requires = ["poetry-core"]

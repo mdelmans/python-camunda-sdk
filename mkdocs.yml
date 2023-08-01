@@ -49,6 +49,9 @@ markdown_extensions:
 extra_css:
   - stylesheets/extra.css
 
+plugins:
+  - mkdocstrings
+
 nav:
   - About: index.md
   - Quick start:
@@ -61,3 +64,5 @@ nav:
     - Inbound connectors:
       - quick_start/inbound_connectors.md
       - quick_start/generate_inbound_template.md
+  - API:
+    - api/connectors.md

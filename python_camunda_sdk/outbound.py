@@ -16,6 +16,10 @@ from python_camunda_sdk.types import SimpleTypes
 
 
 class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
+    """Outbound connector
+
+    Base class for outbound connectors.
+    """
     @classmethod
     def to_task(
         cls,
@@ -24,8 +28,7 @@ class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
         """Converts connector class into a pyzeebe task function.
 
         Returns:
-            A function that validates arguments and executes the
-            connector logic.
+            A function that validates arguments and executes the connector logic.
         """
         async def task(job: Job, **kwargs) -> Union[BaseModel, SimpleTypes]:
             try:
