@@ -1,8 +1,26 @@
+"""`generate_template` command-line-tool
+
+Usage:
+``` console
+$ generate_template --help
+
+Usage: generate_template [OPTIONS] CONNECTOR FILENAME
+
+    Generates a template from a CONNECTOR and saves it to FILENAME.
+
+    CONNECTOR must be a a full class name including the module name, e.g.
+    mymodule.submodule.MyConnector.
+
+Options:
+    --help  Show this message and exit.
+```
+"""
 from python_camunda_sdk import generate_template as p_generate_template
 import importlib
 import click
 import re
 import json
+
 
 @click.command()
 @click.argument(
@@ -18,7 +36,7 @@ def generate_template(connector, filename):
     Generates a template from a CONNECTOR and saves it to FILENAME.
 
     CONNECTOR must be a a full class name including the module name,
-    e.g. mymodule.submodule.MyConnector. 
+    e.g. mymodule.submodule.MyConnector.
     '''
 
     if not filename.endswith('.json'):

@@ -11,21 +11,25 @@ from pydantic.main import ModelMetaclass
 from pyzeebe import Job
 
 from python_camunda_sdk.types import SimpleTypes
-from python_camunda_sdk.config import ConnectorConfig
+from python_camunda_sdk.connectors.config import ConnectorConfig
+
 
 class ConnectorMetaclass(ModelMetaclass):
-    """Base class for connector metaclass"""
+    """Connector metaclass.
+
+    Validates that connector definitions are correct.
+    """
 
     @logger.catch(
         reraise=True,
-        message="Invalid connector definion"
+        message="Invalid connector definition"
     )
     def __new__(
         mcs,
         cls_name,
         bases,
         namespace,
-        base_config_cls  = ConnectorConfig,
+        base_config_cls=ConnectorConfig,
         **kwargs
     ):
         cls = super().__new__(
@@ -35,7 +39,7 @@ class ConnectorMetaclass(ModelMetaclass):
             namespace,
             **kwargs
         )
-        
+
         cls._base_config_cls = base_config_cls
 
         if bases != (BaseModel,) and bases != (Connector,):
@@ -47,9 +51,7 @@ class ConnectorMetaclass(ModelMetaclass):
         return cls
 
     def _generate_config(cls) -> None:
-        """Generate config.
-
-        Converts ConnectorConfig class inside the connector class into a
+        """Converts ConnectorConfig class inside the connector class into a
         `_config` attribute of type defined in `_base_config_cls`.
 
         Raises:
@@ -84,7 +86,7 @@ class ConnectorMetaclass(ModelMetaclass):
         if run_method is None:
             raise AttributeError(
                 'Connector must have a run(self, config) method defined.'
-                f' {cls} appers to have no run() method'
+                f' {cls} appears to have no run() method'
             )
 
     def _check_return_annotation(cls) -> None:
@@ -111,17 +113,34 @@ class ConnectorMetaclass(ModelMetaclass):
     def _extra_pre_init_checks(cls) -> None:
         pass
 
+
 class Connector(BaseModel, metaclass=ConnectorMetaclass):
+    """Connector base class.
+
+    !!! warning
+        Should not be used directly. Use
+        [OutboundConnector]
+        [python_camunda_sdk.connectors.outbound.OutboundConnector] or
+        [InboundConnector]
+        [python_camunda_sdk.connectors.outbound.OutboundConnector]
+        instead.
+    """
     @logger.catch(
         reraise=True,
         message="Failed to execute connector method"
     )
-    async def execute(self, job: Job) -> Optional[Union[BaseModel, SimpleTypes]]:
+    async def _execute(
+        self,
+        job: Job
+    ) -> Optional[Union[BaseModel, SimpleTypes]]:
         """Execute connector `run` method while passing the connector config.
+
+        Arguments:
+            job: An instance of a job.
 
         Raises:
             ValueError: If type of the returned value does not match the
-            typehint.
+                type-hint.
         """
         if inspect.iscoroutinefunction(self.run):
             ret_value = await self.run(self._config)
@@ -141,10 +160,19 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
 
         if return_variable_name is not None:
             return_value = None
-            
+
             if isinstance(ret_value, BaseModel):
                 return_value = ret_value.dict()
             else:
                 return_value = ret_value
 
             return {return_variable_name: return_value}
+
+    async def run(self, config: ConnectorConfig) -> None:
+        """The main connector method that must be overridden by
+        subclasses.
+
+        Arguments:
+            config: Configuration of the connector.
+        """
+        raise NotImplementedError

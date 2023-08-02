@@ -50,7 +50,18 @@ extra_css:
   - stylesheets/extra.css
 
 plugins:
-  - mkdocstrings
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_toc_entry: false
+            show_root_full_path: false
+            inherited_members: true
+            signature_crossrefs: true
+            members_order: source
+      watch:
+        - python_camunda_sdk
 
 nav:
   - About: index.md
@@ -65,4 +76,14 @@ nav:
       - quick_start/inbound_connectors.md
       - quick_start/generate_inbound_template.md
   - API:
-    - api/connectors.md
+    - connectors:
+      - api/connectors/config.md
+      - api/connectors/connector.md
+      - api/connectors/outbound.md
+      - api/connectors/inbound.md
+    - runtime:
+      - api/runtime/config.md
+      - api/runtime/runtime.md
+    - templates:
+      - api/templates/template.md
+      - api/templates/generate_template.md

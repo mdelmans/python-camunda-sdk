@@ -1,1 +1,0 @@
-::: python_camunda_sdk.config.ConnectorConfig

@@ -1,5 +1,29 @@
-import inspect
+"""
+Outbound connectors handle tasks from Zeebe.
 
+Example:
+    ```py
+    from pydantic import BaseModel, Field
+    from loguru import logger
+
+    from python_camunda_sdk import OutboundConnector
+
+    class StatusModel(BaseModel):
+        status: str
+
+    class LogConnector(OutboundConnector):
+        message: str = Field(description="Message to log")
+
+        async def run(self, config) -> StatusModel:
+            logger.info(f"LogConnector: {self.message}")
+
+            return StatusModel(status="ok")
+
+        class ConnectorConfig:
+            name = "LogConnector"
+            type = "log"
+    ```
+"""
 from typing import Union, Optional
 from collections.abc import Coroutine
 
@@ -11,14 +35,12 @@ from pydantic import ValidationError
 from pyzeebe import Job, ZeebeClient
 
 from python_camunda_sdk.config import OutboundConnectorConfig
-from python_camunda_sdk.meta import ConnectorMetaclass, Connector
+from python_camunda_sdk.connectors import Connector
 from python_camunda_sdk.types import SimpleTypes
 
 
 class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
-    """Outbound connector
-
-    Base class for outbound connectors.
+    """Base class for outbound connectors.
     """
     @classmethod
     def to_task(
@@ -28,7 +50,8 @@ class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
         """Converts connector class into a pyzeebe task function.
 
         Returns:
-            A function that validates arguments and executes the connector logic.
+            A coroutine that validates arguments and executes the connector
+                logic.
         """
         async def task(job: Job, **kwargs) -> Union[BaseModel, SimpleTypes]:
             try:
@@ -40,6 +63,6 @@ class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
                 )
                 raise e
 
-            ret = await connector.execute(job=job)
+            ret = await connector._execute(job=job)
             return ret
         return task

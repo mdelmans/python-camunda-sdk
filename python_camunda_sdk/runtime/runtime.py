@@ -1,8 +1,45 @@
+"""Main class of the SDK.
+
+Example:
+    ```py
+    from pydantic import BaseModel, Field
+    from loguru import logger
+
+    from python_camunda_sdk import OutboundConnector, CamundaRuntime, InsecureConfig
+
+    class StatusModel(BaseModel):
+        status: str
+
+    class LogConnector(OutboundConnector):
+        message: str = Field(description="Message to log")
+
+        async def run(self, config) -> StatusModel:
+            logger.info(f"LogConnector: {self.message}")
+
+            return StatusModel(status="ok")
+
+        class ConnectorConfig:
+            name = "LogConnector"
+            type = "log"
+
+
+    config = InsecureConfig(
+        host="127.0.0.1"
+    )
+
+    runtime = CamundaRuntime(
+        config=config,
+        outbound_connectors=[LogConnector]
+    )
+
+    if __name__ == "__main__":
+        runtime.start()
+
+    ```
+"""
 from typing import List, Type, Optional, Union
 
 from grpc import ssl_channel_credentials
-
-from pydantic import BaseModel
 
 import asyncio
 
@@ -16,10 +53,13 @@ from pyzeebe import (
 
 from loguru import logger
 
-from python_camunda_sdk import (
-    ConnectionConfig,
+from python_camunda_sdk.connectors import (
     OutboundConnector,
-    InboundConnector,
+    InboundConnector
+)
+
+from python_camunda_sdk.runtime.config import (
+    ConnectionConfig,
     CloudConfig,
     SecureConfig,
     InsecureConfig,
@@ -28,16 +68,17 @@ from python_camunda_sdk import (
 
 
 class CamundaRuntime:
-    """Camunda runtime.
+    """Creates a worker that listens to the service tasks for the specified
+    outbound and inbound connectors.
 
-    Creates worker that listens to the service tasks for the specified
-    outbound connectors and manages creation of the inbound connector
-    instances.
+    !!! tip
+        If `config` is not supplied will attempt to
+            generate from the environmental variables.
 
-    Args:
+    Arguments:
+        config: Connection config.
         outbound_connectors: A list of outbound connector classes.
         inbound_connectors: A list of the inbound connector classes.
-
     """
     def __init__(
         self,
@@ -45,7 +86,6 @@ class CamundaRuntime:
         outbound_connectors: List[Type[OutboundConnector]] = [],
         inbound_connectors: List[Type[InboundConnector]] = []
     ):
-
         if config is None:
             self._config = generate_config_from_env()
         else:
@@ -77,7 +117,7 @@ class CamundaRuntime:
             )
         else:
             raise TypeError(f'Unsupported config type {type(self._config)}')
-        
+
         self._worker = ZeebeWorker(channel)
         self._client = ZeebeClient(channel)
 
@@ -102,7 +142,8 @@ class CamundaRuntime:
         task_wrapper(connector_cls.to_task(client=self._client))
 
     async def main(self):
-        """Main asyncronous method of the runtime.
+        """Main asyncronous method of the runtime. Use it if you want to
+        run the runtime inside your async loop.
         """
         self._connect()
 
@@ -116,7 +157,8 @@ class CamundaRuntime:
         await self._worker.work()
 
     def start(self):
-        """Syncronous method to start the runtime.
+        """Syncronous method to start the runtime. Will run in the main
+        asycn loop.
         """
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.main())

@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import inspect
 
@@ -6,7 +6,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-from python_camunda_sdk import Connector, InboundConnector
+from python_camunda_sdk.connectors import Connector, InboundConnector
+
 
 class Binding(BaseModel):
     type: str
@@ -23,13 +24,25 @@ class CamundaProperty(BaseModel):
     group: Optional[str]
     feel: Optional[str]
 
+
 class Group(BaseModel):
     id: Optional[str]
     label: Optional[str]
 
 
 class CamundaTemplate(BaseModel):
-    tempate_schema: str = Field(
+    """Camunda template object that follows (incompletely) the official
+    template schema.
+
+    Attributes:
+        template_schema: Alias to `$schema`
+        name:
+        model_id:
+        applies_to:
+        properties:
+        groups:
+    """
+    template_schema: str = Field(
         default=(
             "https://unpkg.com/@camunda/zeebe-element-templates-json-schema"
             "@0.9.0/resources/schema.json"
@@ -70,6 +83,7 @@ def generate_input_props(
 
     return props
 
+
 def generate_inbound_config_props(cls: InboundConnector):
     correlation_key_prop = CamundaProperty(
         label="Correlation key",
@@ -95,6 +109,7 @@ def generate_inbound_config_props(cls: InboundConnector):
 
     return [correlation_key_prop, message_name_prop]
 
+
 def generate_output_prop(
     cls: Connector
 ) -> Optional[CamundaProperty]:
@@ -114,16 +129,18 @@ def generate_output_prop(
         )
         return prop
 
-def generate_template(cls: Connector):
+
+def generate_template(cls: Connector) -> CamundaTemplate:
     """Generate Camunda template from the connector class definition.
 
     Converts connector class into a Camunda template mapping class fields
     into template inputs.
-    
+
     Agrs:
         cls: Connector class.
 
     Example:
+        ```py
         class MyConnector(OutboundConnector):
             name: str = Field(description="Name")
 
@@ -131,14 +148,15 @@ def generate_template(cls: Connector):
                 name = "MyConnector"
                 type = "my_connector"
                 timeout = 1
-
-        Will be converted to a template with input called 'name' and label
-        'Name'. Attributes of the `ConnectorConfig` class will be mapped to
+        ```
+        Will be converted to a template called `MyConnector`. The `name`
+        field will be converted to an input `name` and label
+        `Name`. Attributes of the `ConnectorConfig` class will be mapped to
         the attributes of the template.
 
     Returns:
         A camunda template object that can be converted to json for import
-        into Camunda SAAS or desktop modeller.
+            into Camunda SAAS or desktop modeller.
     """
     props = generate_input_props(cls)
 
@@ -168,7 +186,7 @@ def generate_template(cls: Connector):
 
     props.append(task_type_prop)
 
-    groups=[
+    groups = [
         Group(
             id='input',
             label='Input'
