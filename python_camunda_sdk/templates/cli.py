@@ -1,21 +1,4 @@
-"""`generate_template` command-line-tool
-
-Usage:
-``` console
-$ generate_template --help
-
-Usage: generate_template [OPTIONS] CONNECTOR FILENAME
-
-    Generates a template from a CONNECTOR and saves it to FILENAME.
-
-    CONNECTOR must be a a full class name including the module name, e.g.
-    mymodule.submodule.MyConnector.
-
-Options:
-    --help  Show this message and exit.
-```
-"""
-from python_camunda_sdk import generate_template as p_generate_template
+from python_camunda_sdk.templates import generate_template
 import importlib
 import click
 import re
@@ -31,7 +14,7 @@ import json
     'filename',
     type=click.Path(writable=True, dir_okay=False)
 )
-def generate_template(connector, filename):
+def cli(connector, filename):
     '''
     Generates a template from a CONNECTOR and saves it to FILENAME.
 
@@ -64,7 +47,7 @@ def generate_template(connector, filename):
             f'Could not import {cls_name} from {module_name}'
         )
 
-    template = p_generate_template(connector_cls)
+    template = generate_template(connector_cls)
     with open(filename, 'w') as f:
         data = json.dumps(
             template.dict(
@@ -74,8 +57,8 @@ def generate_template(connector, filename):
             indent=2
         )
         f.write(data)
-    click.echo(f"Generated template for {connector}")
+    click.echo(f'Generated template for {connector}')
 
 
-if __name__ == "__main__":
-    generate_template()
+if __name__ == '__main__':
+    cli()

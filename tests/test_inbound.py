@@ -1,4 +1,3 @@
-import random
 import asyncio
 
 from pydantic import ValidationError
@@ -9,8 +8,9 @@ from python_camunda_sdk import InboundConnector
 
 from util import async_test, DummyJob, DummyClient
 
+
 class ValidInbound(InboundConnector):
-    counter: int  = 0
+    counter: int = 0
 
     async def run(self, config) -> int:
         return self.counter + 1
@@ -19,6 +19,7 @@ class ValidInbound(InboundConnector):
         name = "Valid inbound"
         type = "valid_inbound"
 
+
 class TestInboundConnector(TestCase):
     @async_test
     async def test_valid(self):
@@ -26,7 +27,7 @@ class TestInboundConnector(TestCase):
         client = DummyClient()
 
         connector = ValidInbound(counter=1)
-        ret = await connector.execute(
+        ret = await connector._execute(
             job=job,
             client=client,
             message_name='test_message',
@@ -63,9 +64,9 @@ class TestInboundConnector(TestCase):
         task = ValidInbound.to_task(client=None)
         job = DummyJob(result_variable='ret')
         with self.assertRaises(ValidationError):
-            ret = await task(
+            await task(
                 job=job,
                 message_name='test_message',
                 correlation_key='key_x',
                 counter='foo'
-            )   
+            )

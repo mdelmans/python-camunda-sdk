@@ -6,6 +6,13 @@
 
 **Python Camunda SDK** is an implementation of Camunda SDK in Python built on top of the [pyzeebe](https://github.com/camunda-community-hub/pyzeebe).
 
+## Features
+
+* Inbound and Outbound connector classes
+* Validation with pydantic
+* Template generation
+* Simple runtime
+
 ## Getting started
 
 Install with

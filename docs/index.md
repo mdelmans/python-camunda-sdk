@@ -7,6 +7,13 @@ It simplifies definitions of outbound and inbound connectors and utilises [pydan
 
 [Get started](quick_start){ .md-button }
 
+## Features
+
+* Inbound and Outbound connector classes
+* Validation with pydantic
+* Template generation
+* Simple runtime
+
 ## Dependencies
 
 `pyzeebe`: Zeebe client.

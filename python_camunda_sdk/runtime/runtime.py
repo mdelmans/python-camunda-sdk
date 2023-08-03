@@ -1,42 +1,3 @@
-"""Main class of the SDK.
-
-Example:
-    ```py
-    from pydantic import BaseModel, Field
-    from loguru import logger
-
-    from python_camunda_sdk import OutboundConnector, CamundaRuntime, InsecureConfig
-
-    class StatusModel(BaseModel):
-        status: str
-
-    class LogConnector(OutboundConnector):
-        message: str = Field(description="Message to log")
-
-        async def run(self, config) -> StatusModel:
-            logger.info(f"LogConnector: {self.message}")
-
-            return StatusModel(status="ok")
-
-        class ConnectorConfig:
-            name = "LogConnector"
-            type = "log"
-
-
-    config = InsecureConfig(
-        host="127.0.0.1"
-    )
-
-    runtime = CamundaRuntime(
-        config=config,
-        outbound_connectors=[LogConnector]
-    )
-
-    if __name__ == "__main__":
-        runtime.start()
-
-    ```
-"""
 from typing import List, Type, Optional, Union
 
 from grpc import ssl_channel_credentials
@@ -95,7 +56,7 @@ class CamundaRuntime:
 
         self._inbound_connectors = inbound_connectors
 
-    @logger.catch(message="Failed to connect to Zebee", reraise=True)
+    @logger.catch(message='Failed to connect to Zebee', reraise=True)
     def _connect(self):
         if isinstance(self._config, CloudConfig):
             channel = create_camunda_cloud_channel(
@@ -121,7 +82,7 @@ class CamundaRuntime:
         self._worker = ZeebeWorker(channel)
         self._client = ZeebeClient(channel)
 
-    @logger.catch(message="Failed to load connector")
+    @logger.catch(message='Failed to load connector')
     def _load_connector(
         self,
         connector_cls: Type[Union[OutboundConnector, InboundConnector]]
@@ -150,10 +111,13 @@ class CamundaRuntime:
         connectors = self._outbound_connectors + self._inbound_connectors
 
         for connector_cls in connectors:
-            logger.info(f'Loading {connector_cls._config.name} ({connector_cls._config.type})')
+            logger.info(
+                f'Loading {connector_cls._config.name}'
+                f' ({connector_cls._config.type})'
+            )
             self._load_connector(connector_cls)
 
-        logger.info("Starting runtime")
+        logger.info('Starting runtime')
         await self._worker.work()
 
     def start(self):

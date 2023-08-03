@@ -1,33 +1,3 @@
-"""
-Inbound connectors that send messages to Zeebe.
-
-Upon execution will start an async task with a coroutine defined in a
-`run` method and return `None` to Zeebe.
-
-As soon as the async task completes, the connector will publish a
-message with the defined name and correlation key.
-
-Example:
-    ```py
-    import asyncio
-
-    from pydantic import Field
-
-    from python_camunda_sdk import InboundConnector
-
-
-    class SleepConnector(InboundConnector):
-        duration: int = Field(description="Duration of sleep in seconds")
-
-        async def run(self, config) -> bool:
-            await asyncio.sleep(self.duration)
-            return True
-
-        class ConnectorConfig:
-            name = "Sleep"
-            type = 'sleep'
-    ```
-"""
 from typing import Union, Optional
 from collections.abc import Coroutine
 import asyncio
@@ -46,14 +16,14 @@ from python_camunda_sdk.types import SimpleTypes
 class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
     """Inbound connector base class.
     """
-    async def execute(
+    async def _execute(
         self,
         job: Job,
         client: ZeebeClient,
         correlation_key: str,
         message_name: str
     ):
-        variables = await super().execute(job=job)
+        variables = await super()._execute(job=job)
         await client.publish_message(
             name=message_name,
             correlation_key=correlation_key,

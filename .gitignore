@@ -1,7 +1,7 @@
 **/.DS_Store
 **/*.pyc
-examples
 tests/.coverage
+tests/htmlcov
 site
 dist
 TODO.md

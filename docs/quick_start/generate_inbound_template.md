@@ -3,7 +3,7 @@
 We can create a template for `SleepConnector` using
 
 ``` console
-$ generate_template example.SleepConnector sleep.json
+$ generate_template example.SleepConnector example/sleep.json
 Generated template for example.SleepConnector
 ```
 
@@ -22,15 +22,15 @@ Generated template for example.SleepConnector
 
 === "Template rendering"
 
-	![Image title](/img/inbound_template.png){ align=left, width="300" }
+	![Template](/img/inbound_template.png){ align=left, width="300" }
 
-=== "Template json"
+=== "example/sleep.json"
 
 	``` json linenums="1" title="example/sleep.json"
 	--8<-- "sleep.json"
 	```
 
-=== "SleepConnector"
+=== "example/sleep.py"
 
 	```py linenums="1" title="example/sleep.py"
 	--8<-- "sleep.py"

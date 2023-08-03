@@ -1,52 +1,3 @@
-"""
-These configuration classes define how to connect to a Zeebe instance.
-
-Keys given in description must be used if you prefer to set up
-connection using environmental variables.
-
-In addition, you must set `CAMUNDA_CONNECTION_TYPE` to either
-`SECURE`, `INSECURE` or `CAMUNDA_CLOUD`.
-
-Example Cloud config:
-    ``` py
-    from python_camunda_sdk import CloudConfig
-
-    config = CloudConfig(
-        client_id='jYsgv.SryJYQlcpobk-tZZP~2R60xpNY',
-        client_secret='55kddTbk~yZBFb2NH5GtebWHkSoK1z.TG7G1Hn-n.mH_f4ihpZAUop1-sryxHnyV',
-        cluster_id='7bc802fc-7bf4-4800-b84a-596628d1ed08'
-    )
-    ```
-
-Example Insecure config:
-    ``` py
-    from python_camunda_sdk import InsecureConfig
-
-    config = InsecureConfig(
-        host='127.0.0.1',
-        port=26500
-    )
-    ```
-
-Example secure config:
-    ```py
-    config = SecureConfig(
-        host='127.0.0.1',
-        port=26500,
-        root_certificates='''
-        -----BEGIN CERTIFICATE-----
-        xxx
-        -----BEGIN CERTIFICATE-----
-        '''
-        private_key='''
-        -----BEGIN RSA PRIVATE KEY-----
-        xxx
-        -----BEGIN RSA PRIVATE KEY-----
-        '''
-        certificate_chain=''
-    )
-    ```
-"""
 import os
 from typing import Optional
 
@@ -68,10 +19,12 @@ class CloudConfig(ConnectionConfig):
         client_id: `CAMUNDA_CLIENT_ID`
         client_secret: `CAMUNDA_CLIENT_SECRET`
         cluster_id: `CAMUNDA_CLUSTER_ID`
+        region: `CAMUNDA_REGION`
     """
     client_id: str = Field(env_var='CAMUNDA_CLIENT_ID')
     client_secret: str = Field(env_var='CAMUNDA_CLIENT_SECRET')
     cluster_id: str = Field(env_var='CAMUNDA_CLUSTER_ID')
+    region: str = Field(env_var='CAMUNDA_REGION')
 
 
 class InsecureConfig(ConnectionConfig):
@@ -83,7 +36,7 @@ class InsecureConfig(ConnectionConfig):
         port: `ZEBEE_PORT`
     """
     hostname: str = Field(env_var='ZEBEE_HOSTNAME')
-    port: str = Field(env_var='ZEBEE_PORT')
+    port: Optional[str] = Field(env_var='ZEBEE_PORT', default=26500)
 
 
 class SecureConfig(InsecureConfig):

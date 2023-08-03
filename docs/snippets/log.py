@@ -3,8 +3,10 @@ from loguru import logger
 
 from python_camunda_sdk import OutboundConnector
 
+
 class StatusModel(BaseModel):
     status: str
+
 
 class LogConnector(OutboundConnector):
     message: str = Field(description="Message to log")

@@ -5,9 +5,12 @@ from .config import (
     SecureConfig
 )
 
+from .runtime import CamundaRuntime
+
 __all__ = [
     'ConnectionConfig',
     'CloudConfig',
     'InsecureConfig',
-    'SecureConfig'
+    'SecureConfig',
+    'CamundaRuntime'
 ]

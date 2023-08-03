@@ -12,6 +12,7 @@ from util import (
     DummyJob
 )
 
+
 class DummyModel(BaseModel):
     foo: int
 
@@ -68,10 +69,10 @@ class TestOutbound(TestCase):
                 timeout = 10
 
         connector = DummyOutboundConnector()
-        
+
         job = DummyJob(result_variable='ret')
-        ret = await connector.execute(job=job)
-        
+        ret = await connector._execute(job=job)
+
         self.assertIsInstance(ret, dict)
         self.assertIn('ret', ret)
         self.assertTrue(ret['ret'])
@@ -83,8 +84,8 @@ class TestOutbound(TestCase):
         connector = cls()
 
         job = DummyJob(result_variable='ret')
-        ret = await connector.execute(job=job)
-        
+        ret = await connector._execute(job=job)
+
         self.assertIsInstance(ret, dict)
         self.assertIn('ret', ret)
         self.assertTrue(ret['ret'])
@@ -98,8 +99,8 @@ class TestOutbound(TestCase):
         self.assertIsNotNone(connector)
 
         job = DummyJob(result_variable='ret')
-        ret = await connector.execute(job=job)
-        
+        ret = await connector._execute(job=job)
+
         self.assertIsInstance(ret, dict)
         self.assertIn('ret', ret)
         self.assertIsNone(ret['ret'])
@@ -113,8 +114,8 @@ class TestOutbound(TestCase):
         self.assertIsNotNone(connector)
 
         job = DummyJob(result_variable='ret')
-        ret = await connector.execute(job=job)
-        
+        ret = await connector._execute(job=job)
+
         self.assertIsInstance(ret, dict)
         self.assertIn('ret', ret)
         self.assertIsInstance(ret['ret'], dict)
@@ -128,8 +129,8 @@ class TestOutbound(TestCase):
         self.assertIsNotNone(connector)
 
         job = DummyJob(result_variable='ret')
-        ret = await connector.execute(job=job)
-        
+        ret = await connector._execute(job=job)
+
         self.assertIsInstance(ret, dict)
         self.assertIn('ret', ret)
         self.assertIsInstance(ret['ret'], dict)
@@ -143,7 +144,7 @@ class TestOutbound(TestCase):
         self.assertIsNotNone(connector)
         with self.assertRaises(ValueError):
             job = DummyJob(result_variable='ret')
-            ret = await connector.execute(job=job)
+            await connector._execute(job=job)
 
     def test_no_run_method(self):
         with self.assertRaises(AttributeError):

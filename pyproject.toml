@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-camunda-sdk"
-version = "0.2.0"
+version = "1.0.0"
 description = "Python Camunda SKD"
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
 readme = "README.md"
@@ -16,7 +16,7 @@ loguru = "^0.7.0"
 click = "^8.1.3"
 
 [tool.poetry.scripts]
-generate_template = 'python_camunda_sdk.generate_template:generate_template'
+generate_template = 'python_camunda_sdk.templates:cli'
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.2.7"

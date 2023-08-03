@@ -5,9 +5,18 @@ Outbound connectors are defined as classes derived from `OutboundConnector`. Bel
 !!! tip
     Connectors don't have to return a `BaseModel`. `dict` or simple types like `str`, `int` or `float` work as well.
 
-``` py linenums="1" title="example/log.py"
---8<-- "log.py"
-```
+
+=== "example/log.py"
+
+	``` py linenums="1"
+	--8<-- "log.py"
+	```
+
+=== "example/__init__.py"
+
+	``` py linenums="1"
+	--8<-- "log_init.py"
+	```
 
 Fields on the connector class define inputs to the connector.
 !!! tip

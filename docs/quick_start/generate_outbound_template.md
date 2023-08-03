@@ -21,7 +21,7 @@ Options:
 For example, if `LogConnector`, we use in this guide is part of the `example` module, we can run
 
 ``` console
-$ generate_template example.LogConnector log.json
+$ generate_template example.LogConnector example/log.json
 Generated template for example.LogConnector
 ```
 
@@ -36,25 +36,16 @@ Generated template for example.LogConnector
 
 === "Template rendering"
 
-	![Image title](/img/template.png){ align=left, width="300" }
+	![Template](/img/template.png){ align=left, width="300" }
 
-=== "Template json"
+=== "example/log.json"
 
-	``` json linenums="1" title="example/log.json"
+	``` json linenums="1"
 	--8<-- "log.json"
 	```
 
-=== "LogConnector"
+=== "example/log.py"
 
-	```py linenums="1" title="example/log.py"
+	```py linenums="1"
 	--8<-- "log.py"
 	```
-
-
-## Importing template to Camunda SaaS
-
-Open Modeler, and upload the template using New -> Upload files menu.
-
-## Importing template to Camunda Modeler
-
-Save the template into `resources/element-templates/` directory. See [Configuring templates](https://docs.camunda.io/docs/components/modeler/desktop-modeler/element-templates/configuring-templates/) in the official Caunda documentation for details.

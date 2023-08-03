@@ -44,8 +44,8 @@ class CamundaTemplate(BaseModel):
     """
     template_schema: str = Field(
         default=(
-            "https://unpkg.com/@camunda/zeebe-element-templates-json-schema"
-            "@0.9.0/resources/schema.json"
+            'https://unpkg.com/@camunda/zeebe-element-templates-json-schema'
+            '@0.9.0/resources/schema.json'
         ),
         alias="$schema"
     )
@@ -72,7 +72,7 @@ def generate_input_props(
             prop = CamundaProperty(
                 label=field.field_info.description or field_name,
                 binding=Binding(
-                    type="zeebe:input",
+                    type='zeebe:input',
                     name=field_name
                 ),
                 group='input',
@@ -86,9 +86,9 @@ def generate_input_props(
 
 def generate_inbound_config_props(cls: InboundConnector):
     correlation_key_prop = CamundaProperty(
-        label="Correlation key",
+        label='Correlation key',
         binding=Binding(
-            type="zeebe:input",
+            type='zeebe:input',
             name="correlation_key"
         ),
         group='config',
@@ -97,10 +97,10 @@ def generate_inbound_config_props(cls: InboundConnector):
     )
 
     message_name_prop = CamundaProperty(
-        label="Message name",
+        label='Message name',
         binding=Binding(
-            type="zeebe:input",
-            name="message_name"
+            type='zeebe:input',
+            name='message_name'
         ),
         group='config',
         feel='optional',
@@ -119,13 +119,13 @@ def generate_output_prop(
 
     if return_annotation != signature.empty:
         prop = CamundaProperty(
-            label="Result variable",
+            label='Result variable',
             binding=Binding(
-                type="zeebe:taskHeader",
-                key="resultVariable"
+                type='zeebe:taskHeader',
+                key='resultVariable'
             ),
-            type="String",
-            group="output"
+            type='String',
+            group='output'
         )
         return prop
 
@@ -166,21 +166,21 @@ def generate_template(cls: Connector) -> CamundaTemplate:
 
     if return_annotation != signature.empty:
         prop = CamundaProperty(
-            label="Result variable",
+            label='Result variable',
             binding=Binding(
-                type="zeebe:taskHeader",
-                key="resultVariable"
+                type='zeebe:taskHeader',
+                key='resultVariable'
             ),
-            type="String",
-            group="output"
+            type='String',
+            group='output'
         )
         props.append(prop)
 
     task_type_prop = CamundaProperty(
         value=cls._config.type,
-        type="Hidden",
+        type='Hidden',
         binding=Binding(
-            type="zeebe:taskDefinition:type"
+            type='zeebe:taskDefinition:type'
         )
     )
 

@@ -1,6 +1,8 @@
 from typing import Optional, Union, get_args
 from types import NoneType
 
+from abc import abstractmethod
+
 import inspect
 
 from loguru import logger
@@ -22,7 +24,7 @@ class ConnectorMetaclass(ModelMetaclass):
 
     @logger.catch(
         reraise=True,
-        message="Invalid connector definition"
+        message='Invalid connector definition'
     )
     def __new__(
         mcs,
@@ -83,7 +85,10 @@ class ConnectorMetaclass(ModelMetaclass):
 
     def _check_run_method(cls) -> None:
         run_method = getattr(cls, 'run', None)
-        if run_method is None:
+        if (
+            run_method is None
+            or hasattr(run_method, '__isabstractmethod__')
+        ):
             raise AttributeError(
                 'Connector must have a run(self, config) method defined.'
                 f' {cls} appears to have no run() method'
@@ -127,7 +132,7 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
     """
     @logger.catch(
         reraise=True,
-        message="Failed to execute connector method"
+        message='Failed to execute connector method'
     )
     async def _execute(
         self,
@@ -168,6 +173,7 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
 
             return {return_variable_name: return_value}
 
+    @abstractmethod
     async def run(self, config: ConnectorConfig) -> None:
         """The main connector method that must be overridden by
         subclasses.

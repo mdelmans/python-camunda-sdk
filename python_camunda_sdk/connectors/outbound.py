@@ -1,29 +1,3 @@
-"""
-Outbound connectors handle tasks from Zeebe.
-
-Example:
-    ```py
-    from pydantic import BaseModel, Field
-    from loguru import logger
-
-    from python_camunda_sdk import OutboundConnector
-
-    class StatusModel(BaseModel):
-        status: str
-
-    class LogConnector(OutboundConnector):
-        message: str = Field(description="Message to log")
-
-        async def run(self, config) -> StatusModel:
-            logger.info(f"LogConnector: {self.message}")
-
-            return StatusModel(status="ok")
-
-        class ConnectorConfig:
-            name = "LogConnector"
-            type = "log"
-    ```
-"""
 from typing import Union, Optional
 from collections.abc import Coroutine
 
@@ -34,8 +8,7 @@ from pydantic import ValidationError
 
 from pyzeebe import Job, ZeebeClient
 
-from python_camunda_sdk.config import OutboundConnectorConfig
-from python_camunda_sdk.connectors import Connector
+from python_camunda_sdk.connectors import OutboundConnectorConfig,  Connector
 from python_camunda_sdk.types import SimpleTypes
 
 
