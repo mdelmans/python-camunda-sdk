@@ -14,26 +14,25 @@ from python_camunda_sdk.types import SimpleTypes
 
 
 class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
-    """Inbound connector base class.
-    """
+    """Inbound connector base class."""
+
     async def _execute(
         self,
         job: Job,
         client: ZeebeClient,
         correlation_key: str,
-        message_name: str
+        message_name: str,
     ):
         variables = await super()._execute(job=job)
         await client.publish_message(
             name=message_name,
             correlation_key=correlation_key,
-            variables=variables
+            variables=variables,
         )
 
     @classmethod
     def to_task(
-        cls,
-        client: ZeebeClient
+        cls, client: ZeebeClient
     ) -> Coroutine[..., Optional[Union[BaseModel, SimpleTypes]]]:
         """Converts connector class into a pyzeebe task function.
 
@@ -41,21 +40,15 @@ class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
             A coroutine that validates arguments and executes the connector
                 logic.
         """
+
         async def task(
-            job: Job,
-            correlation_key: str,
-            message_name: str,
-            **kwargs
+            job: Job, correlation_key: str, message_name: str, **kwargs
         ) -> Union[BaseModel, SimpleTypes]:
             try:
-                connector = cls(
-                    correlation_key=correlation_key,
-                    **kwargs
-                )
+                connector = cls(correlation_key=correlation_key, **kwargs)
             except ValidationError as e:
                 logger.exception(
-                    'Failed to validate arguments for '
-                    f'{cls._config.name}'
+                    "Failed to validate arguments for " f"{cls._config.name}"
                 )
                 raise e
 
@@ -65,7 +58,7 @@ class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
                     job=job,
                     client=client,
                     correlation_key=correlation_key,
-                    message_name=message_name
+                    message_name=message_name,
                 )
             )
 

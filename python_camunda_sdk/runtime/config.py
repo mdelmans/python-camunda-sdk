@@ -7,8 +7,8 @@ from loguru import logger
 
 
 class ConnectionConfig(BaseModel):
-    """Base class for connection configuration.
-    """
+    """Base class for connection configuration."""
+
     pass
 
 
@@ -21,10 +21,11 @@ class CloudConfig(ConnectionConfig):
         cluster_id: `CAMUNDA_CLUSTER_ID`
         region: `CAMUNDA_REGION`
     """
-    client_id: str = Field(env_var='CAMUNDA_CLIENT_ID')
-    client_secret: str = Field(env_var='CAMUNDA_CLIENT_SECRET')
-    cluster_id: str = Field(env_var='CAMUNDA_CLUSTER_ID')
-    region: str = Field(env_var='CAMUNDA_REGION')
+
+    client_id: str = Field(env_var="CAMUNDA_CLIENT_ID")
+    client_secret: str = Field(env_var="CAMUNDA_CLIENT_SECRET")
+    cluster_id: str = Field(env_var="CAMUNDA_CLUSTER_ID")
+    region: str = Field(env_var="CAMUNDA_REGION")
 
 
 class InsecureConfig(ConnectionConfig):
@@ -35,8 +36,9 @@ class InsecureConfig(ConnectionConfig):
         hostname: `ZEBEE_HOSTNAME`
         port: `ZEBEE_PORT`
     """
-    hostname: str = Field(env_var='ZEBEE_HOSTNAME')
-    port: Optional[str] = Field(env_var='ZEBEE_PORT', default=26500)
+
+    hostname: str = Field(env_var="ZEBEE_HOSTNAME")
+    port: Optional[str] = Field(env_var="ZEBEE_PORT", default=26500)
 
 
 class SecureConfig(InsecureConfig):
@@ -51,33 +53,34 @@ class SecureConfig(InsecureConfig):
         private_key: `SSL_PRIVATE_KEY`
         certificate_chain: `SSL_CERTIFICATE_CHAIN`
     """
-    root_certificates: str = Field(env_var='SSL_ROOT_CA')
-    private_key: str = Field(env_var='SSL_PRIVATE_KEY')
-    certificate_chain: Optional[str] = Field(env_var='SSL_CERTIFICATE_CHAIN')
+
+    root_certificates: str = Field(env_var="SSL_ROOT_CA")
+    private_key: str = Field(env_var="SSL_PRIVATE_KEY")
+    certificate_chain: Optional[str] = Field(env_var="SSL_CERTIFICATE_CHAIN")
 
 
-@logger.catch(message='Failed to load config variables', reraise=True)
+@logger.catch(message="Failed to load config variables", reraise=True)
 def generate_config_from_env() -> ConnectionConfig:
     cls_map = {
-        'SECURE': SecureConfig,
-        'INSECURE': InsecureConfig,
-        'CAMUNDA_CLOUD': CloudConfig
+        "SECURE": SecureConfig,
+        "INSECURE": InsecureConfig,
+        "CAMUNDA_CLOUD": CloudConfig,
     }
 
-    connection_type = os.environ.get('CAMUNDA_CONNECTION_TYPE', None)
+    connection_type = os.environ.get("CAMUNDA_CONNECTION_TYPE", None)
     if connection_type is None:
-        raise ValueError('CAMUNDA_CONNECTION_TYPE is not defined')
+        raise ValueError("CAMUNDA_CONNECTION_TYPE is not defined")
 
     config_cls = cls_map.get(connection_type, None)
 
     if config_cls is None:
         raise ValueError(
-            f'Unknown CAMUNDA_CONNECTION_TYPE ({connection_type})'
+            f"Unknown CAMUNDA_CONNECTION_TYPE ({connection_type})"
         )
 
     data = {}
     for field_name, field in config_cls.__fields__.items():
-        env_var = field.field_info.extra['env_var']
+        env_var = field.field_info.extra["env_var"]
         data[field_name] = os.environ.get(env_var, None)
 
     return config_cls(**data)

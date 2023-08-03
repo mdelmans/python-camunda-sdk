@@ -13,18 +13,19 @@ class ConnectorConfig(BaseModel):
             the service task that will be calling the connector.
         timeout: Timeout for the connector.
     """
+
     name: str
     type: str
     timeout: Optional[int] = 10
 
 
 class OutboundConnectorConfig(ConnectorConfig):
-    """Outbound connector configuration.
-    """
+    """Outbound connector configuration."""
+
     pass
 
 
 class InboundConnectorConfig(ConnectorConfig):
-    """Inbound connector configuration.
-    """
+    """Inbound connector configuration."""
+
     pass

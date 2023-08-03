@@ -9,22 +9,19 @@ from pyzeebe import (
     ZeebeClient,
     create_insecure_channel,
     create_camunda_cloud_channel,
-    create_secure_channel
+    create_secure_channel,
 )
 
 from loguru import logger
 
-from python_camunda_sdk.connectors import (
-    OutboundConnector,
-    InboundConnector
-)
+from python_camunda_sdk.connectors import OutboundConnector, InboundConnector
 
 from python_camunda_sdk.runtime.config import (
     ConnectionConfig,
     CloudConfig,
     SecureConfig,
     InsecureConfig,
-    generate_config_from_env
+    generate_config_from_env,
 )
 
 
@@ -41,11 +38,12 @@ class CamundaRuntime:
         outbound_connectors: A list of outbound connector classes.
         inbound_connectors: A list of the inbound connector classes.
     """
+
     def __init__(
         self,
         config: Optional[ConnectionConfig] = None,
         outbound_connectors: List[Type[OutboundConnector]] = [],
-        inbound_connectors: List[Type[InboundConnector]] = []
+        inbound_connectors: List[Type[InboundConnector]] = [],
     ):
         if config is None:
             self._config = generate_config_from_env()
@@ -56,16 +54,12 @@ class CamundaRuntime:
 
         self._inbound_connectors = inbound_connectors
 
-    @logger.catch(message='Failed to connect to Zebee', reraise=True)
+    @logger.catch(message="Failed to connect to Zebee", reraise=True)
     def _connect(self):
         if isinstance(self._config, CloudConfig):
-            channel = create_camunda_cloud_channel(
-                **self._config.dict()
-            )
+            channel = create_camunda_cloud_channel(**self._config.dict())
         elif isinstance(self._config, InsecureConfig):
-            channel = create_insecure_channel(
-                **self._config.dict()
-            )
+            channel = create_insecure_channel(**self._config.dict())
         elif isinstance(self._config, SecureConfig):
             channel = create_secure_channel(
                 hostname=self._config.hostname,
@@ -73,19 +67,18 @@ class CamundaRuntime:
                 channel_credentials=ssl_channel_credentials(
                     root_certificates=self._config.root_certificates,
                     private_key=self._config.private_key,
-                    certificate_chain=self._config.certificate_chain
-                )
+                    certificate_chain=self._config.certificate_chain,
+                ),
             )
         else:
-            raise TypeError(f'Unsupported config type {type(self._config)}')
+            raise TypeError(f"Unsupported config type {type(self._config)}")
 
         self._worker = ZeebeWorker(channel)
         self._client = ZeebeClient(channel)
 
-    @logger.catch(message='Failed to load connector')
+    @logger.catch(message="Failed to load connector")
     def _load_connector(
-        self,
-        connector_cls: Type[Union[OutboundConnector, InboundConnector]]
+        self, connector_cls: Type[Union[OutboundConnector, InboundConnector]]
     ) -> None:
         """Loads a connector class and registers it with a pyzeebe worker.
 
@@ -96,9 +89,9 @@ class CamundaRuntime:
 
         task_wrapper = self._worker.task(
             task_type=config.type,
-            timeout_ms=config.timeout*1000,
+            timeout_ms=config.timeout * 1000,
             before=[],
-            after=[]
+            after=[],
         )
         task_wrapper(connector_cls.to_task(client=self._client))
 
@@ -112,12 +105,12 @@ class CamundaRuntime:
 
         for connector_cls in connectors:
             logger.info(
-                f'Loading {connector_cls._config.name}'
-                f' ({connector_cls._config.type})'
+                f"Loading {connector_cls._config.name}"
+                f" ({connector_cls._config.type})"
             )
             self._load_connector(connector_cls)
 
-        logger.info('Starting runtime')
+        logger.info("Starting runtime")
         await self._worker.work()
 
     def start(self):

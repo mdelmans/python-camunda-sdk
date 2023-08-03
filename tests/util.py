@@ -3,7 +3,7 @@ import asyncio
 
 class DummyJob:
     def __init__(self, result_variable: str = None):
-        self.custom_headers = {'resultVariable': result_variable}
+        self.custom_headers = {"resultVariable": result_variable}
 
 
 class DummyClient:
@@ -22,7 +22,7 @@ def none_body(self, config):
 
 
 def dict_body(self, config):
-    return {'foo': '1'}
+    return {"foo": "1"}
 
 
 def async_test(coro):
@@ -32,4 +32,5 @@ def async_test(coro):
             return loop.run_until_complete(coro(*args, **kwargs))
         finally:
             loop.close()
+
     return wrapper

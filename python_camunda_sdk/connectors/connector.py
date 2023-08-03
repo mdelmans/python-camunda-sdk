@@ -22,25 +22,16 @@ class ConnectorMetaclass(ModelMetaclass):
     Validates that connector definitions are correct.
     """
 
-    @logger.catch(
-        reraise=True,
-        message='Invalid connector definition'
-    )
+    @logger.catch(reraise=True, message="Invalid connector definition")
     def __new__(
         mcs,
         cls_name,
         bases,
         namespace,
         base_config_cls=ConnectorConfig,
-        **kwargs
+        **kwargs,
     ):
-        cls = super().__new__(
-            mcs,
-            cls_name,
-            bases,
-            namespace,
-            **kwargs
-        )
+        cls = super().__new__(mcs, cls_name, bases, namespace, **kwargs)
 
         cls._base_config_cls = base_config_cls
 
@@ -60,20 +51,13 @@ class ConnectorMetaclass(ModelMetaclass):
             AttributeError: if class does not have `ConnectorConfig` subclass
                 defined.
         """
-        config_cls = getattr(
-            cls,
-            'ConnectorConfig',
-            None
-        )
+        config_cls = getattr(cls, "ConnectorConfig", None)
         data = {}
 
         if config_cls is None:
-            raise AttributeError(
-                f'{cls} is missing ConnectorConfig'
-            )
+            raise AttributeError(f"{cls} is missing ConnectorConfig")
 
         for field_name, field in cls._base_config_cls.__fields__.items():
-
             if not hasattr(config_cls, field_name):
                 continue
 
@@ -84,14 +68,11 @@ class ConnectorMetaclass(ModelMetaclass):
         cls._config = cls._base_config_cls(**data)
 
     def _check_run_method(cls) -> None:
-        run_method = getattr(cls, 'run', None)
-        if (
-            run_method is None
-            or hasattr(run_method, '__isabstractmethod__')
-        ):
+        run_method = getattr(cls, "run", None)
+        if run_method is None or hasattr(run_method, "__isabstractmethod__"):
             raise AttributeError(
-                'Connector must have a run(self, config) method defined.'
-                f' {cls} appears to have no run() method'
+                "Connector must have a run(self, config) method defined."
+                f" {cls} appears to have no run() method"
             )
 
     def _check_return_annotation(cls) -> None:
@@ -100,9 +81,9 @@ class ConnectorMetaclass(ModelMetaclass):
 
         if return_annotation == signature.empty:
             raise AttributeError(
-                'Connector that return nothing must be annotated with'
-                '-> None.'
-                f' {cls} return nothing.'
+                "Connector that return nothing must be annotated with"
+                "-> None."
+                f" {cls} return nothing."
             )
 
         if (
@@ -111,7 +92,7 @@ class ConnectorMetaclass(ModelMetaclass):
             and return_annotation not in get_args(SimpleTypes)
         ):
             raise AttributeError(
-                f'Connector returns invalid type ({return_annotation})'
+                f"Connector returns invalid type ({return_annotation})"
             )
         cls._return_type = return_annotation
 
@@ -130,13 +111,10 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
         [python_camunda_sdk.connectors.outbound.OutboundConnector]
         instead.
     """
-    @logger.catch(
-        reraise=True,
-        message='Failed to execute connector method'
-    )
+
+    @logger.catch(reraise=True, message="Failed to execute connector method")
     async def _execute(
-        self,
-        job: Job
+        self, job: Job
     ) -> Optional[Union[BaseModel, SimpleTypes]]:
         """Execute connector `run` method while passing the connector config.
 
@@ -154,14 +132,12 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
 
         if not isinstance(ret_value, self._return_type):
             raise ValueError(
-                'Mismatch between return annotation and returned value in'
-                f' {self.__class__}. Expected {self._return_type}, got'
-                f' {type(ret_value)}'
+                "Mismatch between return annotation and returned value in"
+                f" {self.__class__}. Expected {self._return_type}, got"
+                f" {type(ret_value)}"
             )
 
-        return_variable_name = job.custom_headers.get(
-                'resultVariable', None
-            )
+        return_variable_name = job.custom_headers.get("resultVariable", None)
 
         if return_variable_name is not None:
             return_value = None

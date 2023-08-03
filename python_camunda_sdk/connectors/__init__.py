@@ -1,24 +1,21 @@
 from .config import (
     ConnectorConfig,
     OutboundConnectorConfig,
-    InboundConnectorConfig
+    InboundConnectorConfig,
 )
 
-from .connector import (
-    ConnectorMetaclass,
-    Connector
-)
+from .connector import ConnectorMetaclass, Connector
 
 from .outbound import OutboundConnector
 
 from .inbound import InboundConnector
 
 __all__ = [
-    'ConnectorConfig',
-    'OutboundConnectorConfig',
-    'InboundConnectorConfig',
-    'ConnectorMetaclass',
-    'Connector',
-    'OutboundConnector',
-    'InboundConnector'
+    "ConnectorConfig",
+    "OutboundConnectorConfig",
+    "InboundConnectorConfig",
+    "ConnectorMetaclass",
+    "Connector",
+    "OutboundConnector",
+    "InboundConnector",
 ]
