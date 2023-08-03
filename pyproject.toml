@@ -1,9 +1,22 @@
 [tool.poetry]
 name = "python-camunda-sdk"
 version = "1.0.0"
-description = "Python Camunda SKD"
+description = "Python Camunda SDK"
+license = "MIT"
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
 readme = "README.md"
+homepage = "https://mdelmans.github.io/python-camunda-sdk/"
+repository = "https://github.com/mdelmans/python-camunda-sdk"
+documentation = "https://mdelmans.github.io/python-camunda-sdk/"
+keywords = ["python", "camunda", "sdk"]
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	"Framework :: Pydantic",
+	"Intended Audience :: Developers",
+	"Intended Audience :: Information Technology",
+	"License :: OSI Approved :: MIT License",
+	"Natural Language :: English"
+]
 packages = [
 	{include = "python_camunda_sdk"}
 ]
