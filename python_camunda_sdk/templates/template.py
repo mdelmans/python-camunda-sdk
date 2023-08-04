@@ -157,7 +157,7 @@ def generate_template(cls: Connector) -> CamundaTemplate:
         props.append(prop)
 
     task_type_prop = CamundaProperty(
-        value=cls._config.type,
+        value=cls.config.type,
         type="Hidden",
         binding=Binding(type="zeebe:taskDefinition:type"),
     )
@@ -174,7 +174,7 @@ def generate_template(cls: Connector) -> CamundaTemplate:
         groups.append(Group(id="config", label="Configuration"))
 
     template = CamundaTemplate(
-        name=cls._config.name, properties=props, groups=groups
+        name=cls.config.name, properties=props, groups=groups
     )
 
     return template

@@ -27,4 +27,4 @@ The `ConnectorConfig` class defines the `name` of the connector and its `type`. 
 Finally, the logic of the connector is defined in a `run` method. Make sure you annotate the return type.
 
 !!! warning
-	If `run` returns nothing, make sure you annotate it with `async def run(self, config) -> None`.
+	If `run` returns nothing, make sure you annotate it with `async def run(self) -> None`.

@@ -48,7 +48,7 @@ class InboundConnector(Connector, base_config_cls=InboundConnectorConfig):
                 connector = cls(correlation_key=correlation_key, **kwargs)
             except ValidationError as e:
                 logger.exception(
-                    "Failed to validate arguments for " f"{cls._config.name}"
+                    "Failed to validate arguments for " f"{cls.config.name}"
                 )
                 raise e
 

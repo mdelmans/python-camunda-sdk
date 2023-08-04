@@ -13,15 +13,15 @@ class DummyClient:
         self.variables = variables
 
 
-def true_body(self, config):
+def true_body(self):
     return True
 
 
-def none_body(self, config):
+def none_body(self):
     return None
 
 
-def dict_body(self, config):
+def dict_body(self):
     return {"foo": "1"}
 
 

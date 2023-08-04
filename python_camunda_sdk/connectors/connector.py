@@ -65,7 +65,7 @@ class ConnectorMetaclass(ModelMetaclass):
 
             data[field_name] = attr
 
-        cls._config = cls._base_config_cls(**data)
+        cls.config = cls._base_config_cls(**data)
 
     def _check_run_method(cls) -> None:
         run_method = getattr(cls, "run", None)
@@ -110,6 +110,9 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
         [InboundConnector]
         [python_camunda_sdk.connectors.outbound.OutboundConnector]
         instead.
+
+    Attributes:
+        config (ConnectorConfig): Configuration of the connector.
     """
 
     @logger.catch(reraise=True, message="Failed to execute connector method")
@@ -126,9 +129,9 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
                 type-hint.
         """
         if inspect.iscoroutinefunction(self.run):
-            ret_value = await self.run(self._config)
+            ret_value = await self.run()
         else:
-            ret_value = self.run(self._config)
+            ret_value = self.run()
 
         if not isinstance(ret_value, self._return_type):
             raise ValueError(
@@ -150,11 +153,8 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
             return {return_variable_name: return_value}
 
     @abstractmethod
-    async def run(self, config: ConnectorConfig) -> None:
+    async def run(self) -> None:
         """The main connector method that must be overridden by
         subclasses.
-
-        Arguments:
-            config: Configuration of the connector.
         """
         raise NotImplementedError

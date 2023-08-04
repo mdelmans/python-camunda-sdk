@@ -2,7 +2,7 @@
 
 
 ## Overview
-Runtime connects to Zeebe instance and listens to service tasks handled by the connectors.
+Runtime connects to a Zeebe instance and listens to service tasks handled by the connectors.
 
 Runtime does not discover connectors automatically. You need to let runtime know which connectors you want it to handle by passing connector classes through `outbound_connectors` argument.
 
@@ -88,7 +88,7 @@ You can pass configuration object with the details of Zeebe instance you want to
 
 ### With environmental variables
 
-You can also use environment variables to configure connection to Zeebe.
+If you don't pass config to the runtime, it will try to collect connection configuration from the environmental variables specified below.
 
 === "All connection types"
 

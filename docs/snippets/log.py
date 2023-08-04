@@ -11,7 +11,7 @@ class StatusModel(BaseModel):
 class LogConnector(OutboundConnector):
     message: str = Field(description="Message to log")
 
-    async def run(self, config) -> StatusModel:
+    async def run(self) -> StatusModel:
         logger.info(f"LogConnector: {self.message}")
 
         return StatusModel(status="ok")

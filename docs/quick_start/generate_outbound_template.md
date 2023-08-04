@@ -18,7 +18,7 @@ Options:
 	--help  Show this message and exit.
 ```
 
-For example, if `LogConnector`, we use in this guide is part of the `example` module, we can run
+For example, if `LogConnector` is a part of the `example` module, we can run
 
 ``` console
 $ generate_template example.LogConnector example/log.json

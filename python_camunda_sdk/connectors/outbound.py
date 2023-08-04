@@ -31,7 +31,7 @@ class OutboundConnector(Connector, base_config_cls=OutboundConnectorConfig):
                 connector = cls(**kwargs)
             except ValidationError as e:
                 logger.exception(
-                    "Failed to validate arguments for " f"{cls._config.name}"
+                    "Failed to validate arguments for " f"{cls.config.name}"
                 )
                 raise e
 

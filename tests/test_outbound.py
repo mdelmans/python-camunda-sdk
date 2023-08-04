@@ -11,15 +11,15 @@ class DummyModel(BaseModel):
     foo: int
 
 
-def model_body(self, config):
+def model_body(self):
     return DummyModel(foo=1)
 
 
 class TestOutbound(TestCase):
     def generate_outbound_connector(self, run_body, ret_type):
         class DummyOutboundConnector(OutboundConnector):
-            def run(self, config) -> ret_type:
-                return run_body(self, config)
+            def run(self) -> ret_type:
+                return run_body(self)
 
             class ConnectorConfig:
                 name = "dummy"
@@ -37,14 +37,14 @@ class TestOutbound(TestCase):
         with self.assertRaises(AttributeError):
 
             class DummyOutboundConnector(OutboundConnector):
-                def run(self, config):
+                def run(self):
                     return None
 
     def test_new_bad_config(self):
         with self.assertRaises(ValidationError):
 
             class DummyOutboundConnector(OutboundConnector):
-                def run(self, config):
+                def run(self):
                     return None
 
                 class ConnectorConfig:
@@ -55,7 +55,7 @@ class TestOutbound(TestCase):
     @async_test
     async def test_async_run(self):
         class DummyOutboundConnector(OutboundConnector):
-            async def run(self, config) -> bool:
+            async def run(self) -> bool:
                 return True
 
             class ConnectorConfig:
@@ -154,7 +154,7 @@ class TestOutbound(TestCase):
         with self.assertRaises(AttributeError):
 
             class DummyOutboundConnector(OutboundConnector):
-                def run(self, config):
+                def run(self):
                     return True
 
                 class ConnectorConfig:
@@ -169,7 +169,7 @@ class TestOutbound(TestCase):
         with self.assertRaises(AttributeError):
 
             class DummyOutboundConnector(OutboundConnector):
-                def run(self, config) -> DummyClass:
+                def run(self) -> DummyClass:
                     return True
 
                 class ConnectorConfig:
@@ -196,7 +196,7 @@ class TestOutbound(TestCase):
         class DummyOutboundConnector(OutboundConnector):
             input_field: int
 
-            def run(self, config) -> int:
+            def run(self) -> int:
                 return 1
 
             class ConnectorConfig:

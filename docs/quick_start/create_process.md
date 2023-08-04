@@ -2,7 +2,7 @@
 
 This steps will help you to create a simple process and use the connectors loaded to your runtime.
 
-1. Make sure the runtime is active and has both `LogConnector` and `SleepConnector` loaded
+1. Make sure the runtime is active and has both `LogConnector` and `SleepConnector` are loaded.
 
 	```console
 	$ python example/runtime.py
@@ -11,13 +11,13 @@ This steps will help you to create a simple process and use the connectors loade
 	2023-08-03 21:09:30.829 | INFO     | python_camunda_sdk.runtime.runtime:main:117 - Starting runtime
 	```
 
-2. Import templates to Modeller
+2. Import templates to Modeller.
 
-	!!! tip Cloud Modeller
+	!!! tip "Cloud Modeller"
 
 		Open Modeler, and upload the template using New -> Upload files menu.
 
-	!!! tip Desktop Modeller
+	!!! tip "Desktop Modeller"
 		Save the template into `resources/element-templates/` directory. See [Configuring templates](https://docs.camunda.io/docs/components/modeler/desktop-modeler/element-templates/configuring-templates/) in the official Caunda documentation for details.
 
 3. Create a simple process.
@@ -63,3 +63,9 @@ This steps will help you to create a simple process and use the connectors loade
 	2023-08-03 21:55:01.306 | INFO     | log:run:15 - LogConnector: Hello Camunda!
 	2023-08-03 21:55:03.340 | INFO     | log:run:15 - LogConnector: Goodbye!
 	```
+
+<style>
+	.md-footer__link--next{
+		display: none;
+	}
+</style>

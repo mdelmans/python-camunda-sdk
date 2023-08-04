@@ -12,7 +12,7 @@ from util import async_test, DummyJob, DummyClient
 class ValidInbound(InboundConnector):
     counter: int = 0
 
-    async def run(self, config) -> int:
+    async def run(self) -> int:
         return self.counter + 1
 
     class ConnectorConfig:

@@ -1,6 +1,6 @@
 # Define an inbound connector
 
-Implementation of inbound connectors is different from the original one.
+Implementation of inbound connectors is different from the official Camunda SDK.
 
 Instead of automatically fetching Intermediate Catch
 Events from the Operate server, this runtime relies on a process

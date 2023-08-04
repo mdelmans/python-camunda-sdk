@@ -85,7 +85,7 @@ class CamundaRuntime:
         Args:
             connector_cls: Outbound connector class.
         """
-        config = connector_cls._config
+        config = connector_cls.config
 
         task_wrapper = self._worker.task(
             task_type=config.type,
@@ -105,8 +105,8 @@ class CamundaRuntime:
 
         for connector_cls in connectors:
             logger.info(
-                f"Loading {connector_cls._config.name}"
-                f" ({connector_cls._config.type})"
+                f"Loading {connector_cls.config.name}"
+                f" ({connector_cls.config.type})"
             )
             self._load_connector(connector_cls)
 
