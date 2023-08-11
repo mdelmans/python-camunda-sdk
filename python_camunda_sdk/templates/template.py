@@ -11,23 +11,23 @@ from python_camunda_sdk.connectors import Connector, InboundConnector
 
 class Binding(BaseModel):
     type: str
-    name: Optional[str]
-    source: Optional[str]
-    key: Optional[str]
+    name: Optional[str] = None
+    source: Optional[str] = None
+    key: Optional[str] = None
 
 
 class CamundaProperty(BaseModel):
     binding: Binding
-    label: Optional[str]
-    type: Optional[str]
-    value: Optional[str]
-    group: Optional[str]
-    feel: Optional[str]
+    label: Optional[str] = None
+    type: Optional[str] = None
+    value: Optional[str] = None
+    group: Optional[str] = None
+    feel: Optional[str] = None
 
 
 class Group(BaseModel):
-    id: Optional[str]
-    label: Optional[str]
+    id: Optional[str] = None
+    label: Optional[str] = None
 
 
 class CamundaTemplate(BaseModel):
@@ -37,7 +37,7 @@ class CamundaTemplate(BaseModel):
     Attributes:
         template_schema: Alias to `$schema`
         name:
-        model_id:
+        template_id:
         applies_to:
         properties:
         groups:
@@ -52,7 +52,7 @@ class CamundaTemplate(BaseModel):
     )
 
     name: str
-    model_id: Optional[str] = Field(
+    template_id: Optional[str] = Field(
         alias="id", default_factory=lambda: str(uuid4())
     )
     applies_to: Optional[List[str]] = Field(
@@ -64,10 +64,10 @@ class CamundaTemplate(BaseModel):
 
 def generate_input_props(cls: Connector) -> List[CamundaProperty]:
     props = []
-    for field_name, field in cls.__fields__.items():
+    for field_name, field in cls.model_fields.items():
         if not field_name.startswith("_"):
             prop = CamundaProperty(
-                label=field.field_info.description or field_name,
+                label=field.description or field_name,
                 binding=Binding(type="zeebe:input", name=field_name),
                 group="input",
                 feel="optional",

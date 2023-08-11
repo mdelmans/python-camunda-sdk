@@ -41,7 +41,7 @@ def cli(connector, filename):
     template = generate_template(connector_cls)
     with open(filename, "w") as f:
         data = json.dumps(
-            template.dict(exclude_none=True, by_alias=True), indent=2
+            template.model_dump(exclude_none=True, by_alias=True), indent=2
         )
         f.write(data)
     click.echo(f"Generated template for {connector}")

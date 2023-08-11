@@ -57,9 +57,9 @@ class CamundaRuntime:
     @logger.catch(message="Failed to connect to Zebee", reraise=True)
     def _connect(self):
         if isinstance(self._config, CloudConfig):
-            channel = create_camunda_cloud_channel(**self._config.dict())
+            channel = create_camunda_cloud_channel(**self._config.model_dump())
         elif isinstance(self._config, InsecureConfig):
-            channel = create_insecure_channel(**self._config.dict())
+            channel = create_insecure_channel(**self._config.model_dump())
         elif isinstance(self._config, SecureConfig):
             channel = create_secure_channel(
                 hostname=self._config.hostname,

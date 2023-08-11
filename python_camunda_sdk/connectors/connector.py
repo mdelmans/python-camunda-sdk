@@ -8,7 +8,7 @@ import inspect
 from loguru import logger
 
 from pydantic import BaseModel
-from pydantic.main import ModelMetaclass
+from pydantic._internal._model_construction import ModelMetaclass
 
 from pyzeebe import Job
 
@@ -57,7 +57,7 @@ class ConnectorMetaclass(ModelMetaclass):
         if config_cls is None:
             raise AttributeError(f"{cls} is missing ConnectorConfig")
 
-        for field_name, field in cls._base_config_cls.__fields__.items():
+        for field_name, field in cls._base_config_cls.model_fields.items():
             if not hasattr(config_cls, field_name):
                 continue
 
@@ -146,7 +146,7 @@ class Connector(BaseModel, metaclass=ConnectorMetaclass):
             return_value = None
 
             if isinstance(ret_value, BaseModel):
-                return_value = ret_value.dict()
+                return_value = ret_value.model_dump()
             else:
                 return_value = ret_value
 

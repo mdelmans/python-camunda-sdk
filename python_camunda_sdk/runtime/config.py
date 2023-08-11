@@ -22,10 +22,26 @@ class CloudConfig(ConnectionConfig):
         region: `CAMUNDA_REGION`
     """
 
-    client_id: str = Field(env_var="CAMUNDA_CLIENT_ID")
-    client_secret: str = Field(env_var="CAMUNDA_CLIENT_SECRET")
-    cluster_id: str = Field(env_var="CAMUNDA_CLUSTER_ID")
-    region: str = Field(env_var="CAMUNDA_REGION")
+    client_id: str = Field(
+        json_schema_extra={
+            "env_var": "CAMUNDA_CLIENT_ID"
+        }
+    )
+    client_secret: str = Field(
+        json_schema_extra={
+            "env_var": "CAMUNDA_CLIENT_SECRET"
+        }
+    )
+    cluster_id: str = Field(
+        json_schema_extra={
+            "env_var": "CAMUNDA_CLUSTER_ID"
+        }
+    )
+    region: str = Field(
+        json_schema_extra={
+            "env_var": "CAMUNDA_REGION"
+        }
+    )
 
 
 class InsecureConfig(ConnectionConfig):
@@ -37,8 +53,17 @@ class InsecureConfig(ConnectionConfig):
         port: `ZEBEE_PORT`
     """
 
-    hostname: str = Field(env_var="ZEBEE_HOSTNAME")
-    port: Optional[str] = Field(env_var="ZEBEE_PORT", default=26500)
+    hostname: str = Field(
+        json_schema_extra={
+            "env_var": "ZEBEE_HOSTNAME"
+        }
+    )
+    port: Optional[int] = Field(
+        default=26500,
+        json_schema_extra={
+            "env_var": "ZEBEE_PORT"
+        }
+    )
 
 
 class SecureConfig(InsecureConfig):
@@ -54,9 +79,22 @@ class SecureConfig(InsecureConfig):
         certificate_chain: `SSL_CERTIFICATE_CHAIN`
     """
 
-    root_certificates: str = Field(env_var="SSL_ROOT_CA")
-    private_key: str = Field(env_var="SSL_PRIVATE_KEY")
-    certificate_chain: Optional[str] = Field(env_var="SSL_CERTIFICATE_CHAIN")
+    root_certificates: str = Field(
+        json_schema_extra={
+            "env_var": "SSL_ROOT_CA"
+        }
+    )
+    private_key: str = Field(
+        json_schema_extra={
+            "env_var": "SSL_PRIVATE_KEY"
+        }
+    )
+    certificate_chain: Optional[str] = Field(
+        default=None,
+        json_schema_extra={
+            "env_var": "SSL_CERTIFICATE_CHAIN"
+        }
+    )
 
 
 @logger.catch(message="Failed to load config variables", reraise=True)
@@ -79,8 +117,8 @@ def generate_config_from_env() -> ConnectionConfig:
         )
 
     data = {}
-    for field_name, field in config_cls.__fields__.items():
-        env_var = field.field_info.extra["env_var"]
+    for field_name, field in config_cls.model_fields.items():
+        env_var = field.json_schema_extra["env_var"]
         data[field_name] = os.environ.get(env_var, None)
 
     return config_cls(**data)

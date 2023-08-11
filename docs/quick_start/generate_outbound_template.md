@@ -25,6 +25,9 @@ $ generate_template example.LogConnector example/log.json
 Generated template for example.LogConnector
 ```
 
+!!! tip
+	You can skip to [Create process](/quick_start/create_process) to learn how to load the template to Modeler.
+
 ## Template conversion
 
 `LogConnector` class have been converted to a template:
@@ -49,3 +52,4 @@ Generated template for example.LogConnector
 	```py linenums="1"
 	--8<-- "log.py"
 	```
+
