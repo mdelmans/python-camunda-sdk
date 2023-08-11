@@ -51,6 +51,8 @@ extra_css:
 
 plugins:
   - autorefs
+  - social:
+      cards_dir: img/social
   - mkdocstrings:
       handlers:
         python:

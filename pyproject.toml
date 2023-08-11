@@ -36,6 +36,8 @@ coverage = "^7.2.7"
 mkdocs-material = "^9.1.18"
 mkdocstrings-python = "^1.2.1"
 black = "^23.7.0"
+pillow = "^10.0.0"
+cairosvg = "^2.7.1"
 
 [build-system]
 requires = ["poetry-core"]
