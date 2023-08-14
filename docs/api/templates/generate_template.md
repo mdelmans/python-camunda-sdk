@@ -16,7 +16,3 @@ Usage: generate_template [OPTIONS] CONNECTOR FILENAME
 Options:
     --help  Show this message and exit.
 ```
-
-
-::: python_camunda_sdk.templates.generate_template
-

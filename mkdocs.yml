@@ -66,7 +66,7 @@ plugins:
         - python_camunda_sdk
 
 nav:
-  - About: index.md
+  - Home: index.md
   - Quick start:
     - quick_start/index.md
     - Outbound connectors:

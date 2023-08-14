@@ -119,7 +119,7 @@ def generate_template(cls: Connector) -> CamundaTemplate:
     Converts connector class into a Camunda template mapping class fields
     into template inputs.
 
-    Agrs:
+    Parameters:
         cls: Connector class.
 
     Example:
