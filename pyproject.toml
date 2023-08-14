@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-camunda-sdk"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python Camunda SDK"
 license = "MIT"
 authors = ["Mihails Delmans <m.delmans@gmail.com>"]
