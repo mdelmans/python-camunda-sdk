@@ -22,7 +22,7 @@ Generated template for example.SleepConnector
 
 === "Template rendering"
 
-	![Template](/img/inbound_template.png){ align=left, width="300" }
+	![Template](../img/inbound_template.png){ align=left, width="300" }
 
 === "example/sleep.json"
 

@@ -39,7 +39,7 @@ Generated template for example.LogConnector
 
 === "Template rendering"
 
-	![Template](/img/template.png){ align=left, width="300" }
+	![Template](../img/template.png){ align=left, width="300" }
 
 === "example/log.json"
 

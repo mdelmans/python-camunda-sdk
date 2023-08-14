@@ -1,4 +1,5 @@
 site_name: Python Camunda SDK
+site_url: https://mdelmans.github.io/python-camunda-sdk
 repo_url: https://github.com/mdelmans/python-camunda-sdk
 repo_name: mdelmans/python-camunda-sdk
 theme:
